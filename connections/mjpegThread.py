@@ -28,13 +28,13 @@ def createMjpegThread(container, url, stop):
     return t
 
 def MjpegConnection(container, url, stop):
-    print(f'mjpeg thread started: {url}')
+    # print(f'mjpeg thread started: {url}')
     connectionOpen = True
     try:
         urlopen(url, timeout=3)
     except:
         connectionOpen = False
-        print(f'{url} timed out')
+        # print(f'{url} timed out')
         stop = lambda:True
     
     if connectionOpen:
@@ -81,4 +81,4 @@ def MjpegConnection(container, url, stop):
     if connectionOpen:
         client.stop()
     
-    print(f'mjpeg thread stopped: {url}')
+    # print(f'mjpeg thread stopped: {url}')

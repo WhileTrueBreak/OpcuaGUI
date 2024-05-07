@@ -47,7 +47,7 @@ class KukaRobot:
         self.forceVectorEndpoint = None
 
         self.lastForceColor = ()
-        self.lastFoceMat = None
+        self.lastForceMat = None
 
         self.__loadModel()
         self.__setupConnections()
@@ -115,7 +115,6 @@ class KukaRobot:
             self.forceVector[1] = self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_ForY'), default=0)[0]
             self.forceVector[2] = self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_ForZ'), default=0)[0]
     
-    # @timing
     def __updateJoints(self):
         attachFrame = self.attach.getFrame() if self.attach else np.identity(4)
         Robot1_T_0_ = self.lastLinkTmats.copy()
@@ -154,9 +153,9 @@ class KukaRobot:
         if self.lastForceColor != (0,0,0,0.7):
             self.modelRenderer.setColor(self.forceVectorId, (0,0,0,0.7))
             self.lastForceColor = (0,0,0,0.7)
-        if self.lastFoceMat != hash(bytes(forceTransform)):
+        if self.lastForceMat != hash(bytes(forceTransform)):
             self.modelRenderer.setTransformMatrix(self.forceVectorId, forceTransform)
-            self.lastFoceMat = hash(bytes(forceTransform))
+            self.lastForceMat = hash(bytes(forceTransform))
 
     @timing
     def start(self):

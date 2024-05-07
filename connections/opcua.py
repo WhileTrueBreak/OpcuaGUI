@@ -5,6 +5,7 @@ from threading import Thread
 import time
 
 from utils.debug import *
+import random
 
 class OpcuaContainer:
     def __init__(self):
@@ -26,7 +27,7 @@ class OpcuaContainer:
 
 class Opcua:
 
-    DEFAULT_POLLING_RATE = 30
+    DEFAULT_POLLING_RATE = 60
 
     def __init__(self, host):
         self.OpcUaHost = host
@@ -58,7 +59,7 @@ class Opcua:
     def opcuaReceiverConnection(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         print(f'Opcua receiver thread started: {host}')
         start = time.time_ns()
-        delay = 1/pollingRate*1000000000
+        nanoPerPoll = 1/pollingRate*1000000000
         try:
             client = Opcua(host)
         except:
@@ -66,26 +67,34 @@ class Opcua:
             stop = lambda:True
         rate = 0
         accum = 0
+        timeCounter = 0
         start = time.time_ns()
         while not stop():
-            try:
-                asyncio.run(Opcua.OpcuaGetData(container, data, client))
-            except:
-                return
-            time_past = time.time_ns() - start
-            accum += time.time_ns() - start
-            start = time.time_ns()
-            time.sleep(max(0, (delay-time_past)/1000000000))
-            rate += 1
-            if accum >= 10000000000:
-                # print(f'Opcua receiver polling rate: {int(rate/10)}/s')
-                accum -= 10000000000
+            current = time.time_ns()
+            time_past = current - start
+            accum += time_past
+            timeCounter += time_past
+            start = current
+            if accum >= nanoPerPoll:
+                try:
+                    asyncio.run(Opcua.OpcuaGetData(container, data, client))
+                except:
+                    return
+                rate += 1
+                accum = 0
+            else:
+                time.sleep((nanoPerPoll - accum)/1000000000)
+            if timeCounter >= 10000000000:
+                print(f'Opcua receiver polling rate: {int(rate/10)}/s')
+                timeCounter -= 10000000000
                 rate = 0
         print(f'Opcua receiver thread stopped: {host}')
     @staticmethod
     async def OpcuaGetData(container, data, client):
-        for d in data:
-            container.setValue(d, *(await client.getValue(d)))
+        values = await asyncio.gather(*[client.getValue(d) for d in data])
+        for d, v in zip(data, values):
+            container.setValue(d, *v)
+            # container.setValue(d, random.random(), '')
     @staticmethod
     def createOpcuaTransmitterThread(container, host, stop, pollingRate=DEFAULT_POLLING_RATE):
         t = Thread(target = Opcua.opcuaTransmitterConnection, args =(container, host, stop, pollingRate))
@@ -98,28 +107,34 @@ class Opcua:
         try:
             client = Opcua(host)
         except:
-            print(f'Opcua receiver thread stopping: {host}')
+            print(f'Opcua transmitter thread stopping: {host}')
             stop = lambda:True
         start = time.time_ns()
-        delay = 1/pollingRate*1000000000
+        nanoPerPoll = 1/pollingRate*1000000000
         rate = 0
         accum = 0
+        timeCounter = 0
         while not stop():
-            start = time.time_ns()
-            try:
-                for key in container.opcuaDict:
-                    if not container.hasUpdated(key): continue
-                    v,t = container.getValue(key)
-                    asyncio.run(client.setValue(key, v, t))
-            except:
-                return
-            time_past = time.time_ns() - start
-            time.sleep(max(0, (delay-time_past)/1000000000))
-            rate += 1
-            accum += time.time_ns() - start
-            if accum >= 10000000000:
-                # print(f'Opcua transmitter polling rate: {int(rate/10)}/s')
-                accum -= 10000000000
+            current = time.time_ns()
+            time_past = current - start
+            accum += time_past
+            timeCounter += time_past
+            start = current
+            if accum >= nanoPerPoll:
+                try:
+                    for key in container.opcuaDict:
+                        if not container.hasUpdated(key): continue
+                        v,t = container.getValue(key)
+                        asyncio.run(client.setValue(key, v, t))
+                except:
+                    return
+                rate += 1
+                accum = 0
+            else:
+                time.sleep((nanoPerPoll - accum)/1000000000)
+            if timeCounter >= 10000000000:
+                print(f'Opcua transmitter polling rate: {int(rate/10)}/s')
+                timeCounter -= 10000000000
                 rate = 0
         print(f'Opcua transmitter thread stopped: {host}')
 

@@ -223,6 +223,9 @@ class BatchRenderer:
         GL.glUniformMatrix4fv(self.viewMatrix, 1, GL.GL_TRUE, matrix)
     
     def setTransformMatrix(self, id, matrix):
+        # print(np.absolute(self.transformationMatrices[id]-matrix.T))
+        # print(np.allclose(self.transformationMatrices[id], matrix.T, 1e-06, 1e-09))
+        if np.allclose(self.transformationMatrices[id], matrix.T, 1e-06, 1e-09): return
         self.transformationMatrices[id] = matrix.T 
         # data = np.concatenate(self.transformationMatrices, axis=0).astype(np.float32)
         GL.glBindBuffer(GL.GL_SHADER_STORAGE_BUFFER, self.ssbo)

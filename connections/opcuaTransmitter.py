@@ -2,7 +2,7 @@ from connections.opcua import *
 from utils.interfaces.pollController import PollController
 
 class OpcuaTransmitter(PollController):
-    def __init__(self, container, host, pollingRate=30):
+    def __init__(self, container, host, pollingRate=10):
         self.container = container
         self.host = host
         self.threadStopFlag = False
