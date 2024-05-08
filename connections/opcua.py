@@ -50,6 +50,10 @@ class Opcua:
             return (await self.nodeDict[node].get_value(), await self.nodeDict[node].read_data_type_as_variant_type())
         except Exception:
             raise Exception(f'Error getting value')
+    
+    def stop(self):
+        asyncio.run(self.opcuaClient.disconnect())
+
     @staticmethod
     def createOpcuaReceiverThread(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         t = Thread(target = Opcua.opcuaReceiverConnection, args =(container, host, data, stop, pollingRate))
@@ -77,7 +81,10 @@ class Opcua:
             start = current
             if accum >= nanoPerPoll:
                 try:
-                    asyncio.run(Opcua.OpcuaGetData(container, data, client))
+                    loop = asyncio.get_event_loop()
+                    task = loop.create_task(Opcua.OpcuaGetData(container, data, client))
+                    loop.run_until_complete(task)
+                    # asyncio.run(Opcua.OpcuaGetData(container, data, client))
                 except:
                     return
                 rate += 1
@@ -88,6 +95,7 @@ class Opcua:
                 print(f'Opcua receiver polling rate: {int(rate/10)}/s')
                 timeCounter -= 10000000000
                 rate = 0
+        client.stop()
         print(f'Opcua receiver thread stopped: {host}')
     @staticmethod
     async def OpcuaGetData(container, data, client):
@@ -125,7 +133,11 @@ class Opcua:
                     for key in container.opcuaDict:
                         if not container.hasUpdated(key): continue
                         v,t = container.getValue(key)
-                        asyncio.run(client.setValue(key, v, t))
+                        
+                        loop = asyncio.get_event_loop()
+                        task = loop.create_task(client.setValue(key, v, t))
+                        loop.run_until_complete(task)
+                        # asyncio.run(client.setValue(key, v, t))
                 except:
                     return
                 rate += 1
@@ -136,6 +148,7 @@ class Opcua:
                 print(f'Opcua transmitter polling rate: {int(rate/10)}/s')
                 timeCounter -= 10000000000
                 rate = 0
+        client.stop()
         print(f'Opcua transmitter thread stopped: {host}')
 
 

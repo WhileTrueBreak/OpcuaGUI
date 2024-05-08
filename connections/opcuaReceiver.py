@@ -1,4 +1,5 @@
 from connections.opcua import *
+from utils.debug import *
 from utils.interfaces.pollController import PollController
 
 class OpcuaReceiver(PollController):
@@ -15,5 +16,8 @@ class OpcuaReceiver(PollController):
         if self.thread == None or not self.thread.is_alive():
             self.thread = Opcua.createOpcuaReceiverThread(self.container, self.host, self.data, lambda:self.threadStopFlag, pollingRate=self.pollingRate)
 
+    @timing
     def stop(self):
         self.threadStopFlag = True
+        if self.thread:
+            self.thread.join(5)

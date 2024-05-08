@@ -87,12 +87,15 @@ class KukaRobot:
                     self.__getNodeName('d_Joi5'),
                     self.__getNodeName('d_Joi6'),
                     self.__getNodeName('d_Joi7'),
-                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
-        self.receivers.append(OpcuaReceiver([
                     self.__getNodeName('d_ForX'),
                     self.__getNodeName('d_ForY'),
                     self.__getNodeName('d_ForZ'),
                 ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
+        # self.receivers.append(OpcuaReceiver([
+        #             self.__getNodeName('d_ForX'),
+        #             self.__getNodeName('d_ForY'),
+        #             self.__getNodeName('d_ForZ'),
+        #         ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
     
     def update(self, delta):
         self.__updateFromOpcua()
@@ -315,8 +318,8 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
                     self.__getNodeName('c_Start'),
                     self.__getNodeName('f_Ready'),
                     self.__getNodeName('f_End'),
-                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION)
-        self.transmitter = OpcuaTransmitter(self.opcuaTransmitterContainer, Constants.OPCUA_LOCATION)
+                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION, pollingRate=5)
+        self.transmitter = OpcuaTransmitter(self.opcuaTransmitterContainer, Constants.OPCUA_LOCATION, pollingRate=5)
 
     def __createUi(self):
         self.pages = Pages(self.window, Constraints.ALIGN_PERCENTAGE(0, 0, 1, 1))

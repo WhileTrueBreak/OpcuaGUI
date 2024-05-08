@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+import asyncio
 
 import random
 
@@ -174,6 +175,11 @@ class Window:
         self.waitStop()
     
     def waitStop(self):
+        loop = asyncio.get_event_loop()
+        pending = asyncio.all_tasks(loop=loop)
+        group = asyncio.gather(*pending)
+        loop.run_until_complete(group)
+        loop.close()
         self.stop()
     
     def stop(self):
