@@ -87,15 +87,22 @@ class KukaRobot:
                     self.__getNodeName('d_Joi5'),
                     self.__getNodeName('d_Joi6'),
                     self.__getNodeName('d_Joi7'),
+                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
+        self.receivers.append(OpcuaReceiver([ 
                     self.__getNodeName('d_ForX'),
                     self.__getNodeName('d_ForY'),
                     self.__getNodeName('d_ForZ'),
                 ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
-        # self.receivers.append(OpcuaReceiver([
-        #             self.__getNodeName('d_ForX'),
-        #             self.__getNodeName('d_ForY'),
-        #             self.__getNodeName('d_ForZ'),
-        #         ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
+        self.receivers.append(OpcuaReceiver([
+                    self.__getNodeName('d_EndX'),
+                    self.__getNodeName('d_EndY'),
+                    self.__getNodeName('d_EndZ'),
+                    self.__getNodeName('d_EndA'),
+                    self.__getNodeName('d_EndB'),
+                    self.__getNodeName('d_EndC'),
+                    self.__getNodeName('d_RunA'),
+                    self.__getNodeName('d_Conf'),
+                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
     
     def update(self, delta):
         self.__updateFromOpcua()
