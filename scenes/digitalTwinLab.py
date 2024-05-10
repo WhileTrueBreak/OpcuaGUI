@@ -143,8 +143,7 @@ class DigitalTwinLab(Scene):
 
     def __addRobots(self):
         self.bases = []
-        # ROBOT 3 - KEENANS DEMO ROBOT
-        # base = StaticModel(self.modelRenderer, Assets.KUKA_FLEX, createTransformationMatrix(2.3, 5, 0.89, 0, 0, 180))
+        # # ROBOT 3 - KEENANS DEMO ROBOT
         base = KukaBase(self.modelRenderer, Assets.KUKA_FLEX, (23, 3), posParams=(0,0,0,True))
         base.setAttachTransform(createTransformationMatrix(0, 0, 0.89, 0, 0, 0))
         arm = KukaRobotTwin(self.window, createTransformationMatrix(0.315, 0, 0, 0, 0, 0), 23, 'R3', self.modelRenderer, hasForceVector=True, hasGripper=True)
@@ -156,7 +155,6 @@ class DigitalTwinLab(Scene):
         self.models.append(arm)
         
         # # ROBOT 4 - MSM Testing ROBOT
-        # base = StaticModel(self.modelRenderer, Assets.KUKA_FLEX, createTransformationMatrix(14, 2.5, 0.89, 0, 0, 0))
         base = KukaBase(self.modelRenderer, Assets.KUKA_FLEX, (24, 4), posParams=(0,0,0,True))
         base.setAttachTransform(createTransformationMatrix(0, 0, 0.89, 0, 0, 0))
         arm = KukaRobotTwin(self.window, createTransformationMatrix(0.315, 0, 0, 0, 0, 0), 24, 'R4', self.modelRenderer, hasForceVector=True, hasGripper=False)
@@ -168,7 +166,6 @@ class DigitalTwinLab(Scene):
         self.models.append(arm)
 
         # # ROBOT 1 - Moblie 1
-        # base = StaticModel(self.modelRenderer, Assets.OMNIMOVE, createTransformationMatrix(13, 1, 0.9, 0, 0, -90))
         base = KukaBase(self.modelRenderer, Assets.OMNIMOVE, (21, 1), posParams=(0,0,0,False))
         base.setAttachTransform(createTransformationMatrix(0, 0, 0.7, 0, 0, 0))
         arm = KukaRobotTwin(self.window, createTransformationMatrix(0.363, -0.184, 0, 0, 0, -90), 21, 'R1', self.modelRenderer, hasForceVector=True, hasGripper=True)
@@ -180,7 +177,6 @@ class DigitalTwinLab(Scene):
         self.models.append(arm)
         
         # # ROBOT 2 - Moblie 2
-        # base = StaticModel(self.modelRenderer, Assets.OMNIMOVE, createTransformationMatrix(14.2, 1, 0.9, 0, 0, 0))
         base = KukaBase(self.modelRenderer, Assets.OMNIMOVE, (22, 2), posParams=(0,0,0,False))
         base.setAttachTransform(createTransformationMatrix(0, 0, 0.7, 0, 0, 0))
         arm = KukaRobotTwin(self.window, createTransformationMatrix(0.363, -0.184, 0, 0, 0, -90), 22, 'R2', self.modelRenderer, hasForceVector=True, hasGripper=True)

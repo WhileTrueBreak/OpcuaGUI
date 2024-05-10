@@ -45,6 +45,9 @@ class KukaRobot:
         self.lastLinkTmats = None
         self.lastJoints = [0,0,0,0,0,0,-1]
         self.forceVectorEndpoint = None
+        
+        self.endPose = None
+        self.lastEndPose = None
 
         self.lastForceColor = ()
         self.lastForceMat = None
@@ -94,19 +97,19 @@ class KukaRobot:
                     self.__getNodeName('d_ForZ'),
                 ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
         self.receivers.append(OpcuaReceiver([
-                    self.__getNodeName('d_EndX'),
-                    self.__getNodeName('d_EndY'),
-                    self.__getNodeName('d_EndZ'),
-                    self.__getNodeName('d_EndA'),
-                    self.__getNodeName('d_EndB'),
-                    self.__getNodeName('d_EndC'),
-                    self.__getNodeName('d_RunA'),
-                    self.__getNodeName('d_Conf'),
+                    self.__getNodeName('d_PosX'),
+                    self.__getNodeName('d_PosY'),
+                    self.__getNodeName('d_PosZ'),
+                    self.__getNodeName('d_RotA'),
+                    self.__getNodeName('d_RotB'),
+                    self.__getNodeName('d_RotC'),
                 ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
     
     def update(self, delta):
         self.__updateFromOpcua()
         self.__updateJoints()
+        if self.endPose is not None:
+            self.__updateForceVector(self.endPose)
     
     def __updateFromOpcua(self):
         if not self.isLinkedOpcua: return
@@ -124,6 +127,19 @@ class KukaRobot:
             self.forceVector[0] = self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_ForX'), default=0)[0]
             self.forceVector[1] = self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_ForY'), default=0)[0]
             self.forceVector[2] = self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_ForZ'), default=0)[0]
+        if (self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_PosX')) and
+            self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_PosY')) and
+            self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_PosZ')) and
+            self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_RotA')) and
+            self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_RotB')) and
+            self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_RotC'))):
+            pos =  (self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_PosX'), default=0)[0]/1000,
+                    self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_PosY'), default=0)[0]/1000,
+                    self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_PosZ'), default=0)[0]/1000)
+            rot =  (self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_RotA'), default=0)[0],
+                    self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_RotB'), default=0)[0],
+                    self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_RotC'), default=0)[0])
+            self.endPose = createTransformationMatrix(*pos, *rot)
     
     def __updateJoints(self):
         attachFrame = self.attach.getFrame() if self.attach else np.identity(4)
@@ -142,9 +158,20 @@ class KukaRobot:
                 continue
             self.modelRenderer.setTransformMatrix(id, mat)
             self.lastTmats[id] = hashed
-        self.forceVectorEndpoint = Robot1_T_0_[-1]
-        self.__updateForceVector(self.forceVectorEndpoint)
+        
+        self.endPose = Robot1_T_0_[-1]
     
+    def __updateUsingPose(self):
+        print("update")
+
+        pose, nsparam, rconf, _ = ForwardKinematics(self.joints)
+        joints, _, _ = InverseKinematics(pose, nsparam, rconf)
+
+        print(self.joints)
+        print(joints)
+
+        return self.joints
+
     def __updateForceVector(self, transform):
         attachFrame = self.attach.getFrame() if self.attach else np.identity(4)
         if not self.hasForceVector or self.forceVectorId == None: return
