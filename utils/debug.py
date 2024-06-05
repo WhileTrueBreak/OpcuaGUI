@@ -19,6 +19,7 @@ def timing(func):
         lCount.append(0)
         tree.append(TREE_NEXT)
         TREE_NEXT = " "
+
         start = time.time_ns()
 
         out = func(*arg, **kw)
