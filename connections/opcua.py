@@ -69,6 +69,7 @@ class Opcua:
         except:
             print(f'Opcua receiver thread stopping: {host}')
             stop = lambda:True
+            return
         rate = 0
         accum = 0
         timeCounter = 0
@@ -117,6 +118,7 @@ class Opcua:
         except:
             print(f'Opcua transmitter thread stopping: {host}')
             stop = lambda:True
+            return
         start = time.time_ns()
         nanoPerPoll = 1/pollingRate*1000000000
         rate = 0

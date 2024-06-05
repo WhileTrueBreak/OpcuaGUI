@@ -36,6 +36,15 @@ class Assets:
 
         if Assets.INIT: return
 
+        Assets.TEXT_SHADER = Assets.linkShaders('res/shaders/ui/textureVertex.glsl', 'res/shaders/ui/textFragment.glsl')
+        Assets.GUI_SHADER = Assets.linkShaders('res/shaders/ui/guiVertex.glsl', 'res/shaders/ui/guiFragment.glsl')
+        Assets.SCREEN_SHADER = Assets.linkShaders('res/shaders/ui/screenVertex.glsl', 'res/shaders/ui/screenFragment.glsl')
+
+        Assets.OPAQUE_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/opaqueFragment.glsl')
+        Assets.TRANSPARENT_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/transparentFragment.glsl')
+        Assets.COMPOSITE_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/compositeFragment.glsl')
+        Assets.CELL_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/cellFragment.glsl')
+        
         Assets.KUKA_IIWA14_MODEL = [None]*8
         Assets.KUKA_IIWA14_MODEL[0] = Assets.loadModelFile('res/models/iiwa14/visual/link_0.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
         Assets.KUKA_IIWA14_MODEL[1] = Assets.loadModelFile('res/models/iiwa14/visual/link_1.stl', createTransformationMatrix(0,0,-(0.36-0.1575), 0, 0, 0))
@@ -93,15 +102,6 @@ class Assets:
         Assets.RIGHT_ARROW = Assets.loadTexture('res/textures/arrow.png', flipX=True)
         Assets.DOWN_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=270)
 
-        Assets.TEXT_SHADER = Assets.linkShaders('res/shaders/ui/textureVertex.glsl', 'res/shaders/ui/textFragment.glsl')
-        Assets.GUI_SHADER = Assets.linkShaders('res/shaders/ui/guiVertex.glsl', 'res/shaders/ui/guiFragment.glsl')
-        Assets.SCREEN_SHADER = Assets.linkShaders('res/shaders/ui/screenVertex.glsl', 'res/shaders/ui/screenFragment.glsl')
-
-        Assets.OPAQUE_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/opaqueFragment.glsl')
-        Assets.TRANSPARENT_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/transparentFragment.glsl')
-        Assets.COMPOSITE_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/compositeFragment.glsl')
-        Assets.CELL_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/cellFragment.glsl')
-        
         Assets.MONACO_FONT = Assets.loadFont('res/fonts/MONACO.TTF')
         Assets.COMIC_SANS_FONT = Assets.loadFont('res/fonts/comic_sans.ttf')
         Assets.ARIAL_FONT = Assets.loadFont('res/fonts/ARIALNB.TTF',48*64)

@@ -395,6 +395,12 @@ class Renderer:
         self.depthTexture = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.depthTexture)
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_DEPTH_COMPONENT, textureDim[0], textureDim[1], 0, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT, None)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_COMPARE_FUNC, GL.GL_LEQUAL)
+        GL.glTexParameteri (GL.GL_TEXTURE_2D, GL.GL_TEXTURE_COMPARE_MODE, GL.GL_NONE)
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.opaqueFBO)
@@ -640,6 +646,7 @@ class Renderer:
             GL.glUniform1ui(bidLoc, self.batches.index(batch)+1)
             batch.render()
 
+
         if self.supportTransparency:
             # config states
             GL.glDepthMask(GL.GL_FALSE)
@@ -669,6 +676,8 @@ class Renderer:
             # render composite
             GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.opaqueFBO)
 
+            GL.glDisable(GL.GL_DEPTH_TEST)
+
             GL.glUseProgram(self.compositeShader)
 
             GL.glActiveTexture(GL.GL_TEXTURE0)
@@ -683,7 +692,10 @@ class Renderer:
             GL.glBindVertexArray(self.quadVAO)
             GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
 
+            GL.glEnable(GL.GL_DEPTH_TEST)
+        
         ##### CELL SHADING #####
+        GL.glDisable(GL.GL_DEPTH_TEST)
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.opaqueFBO)
         GL.glUseProgram(Assets.CELL_SHADER)
 
@@ -694,8 +706,12 @@ class Renderer:
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.pickingTexture)
         GL.glUniform1i(GL.glGetUniformLocation(Assets.CELL_SHADER, "picking"), 1)
+        GL.glActiveTexture(GL.GL_TEXTURE2)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.depthTexture)
+        GL.glUniform1i(GL.glGetUniformLocation(Assets.CELL_SHADER, "depth"), 2)
         GL.glBindVertexArray(self.quadVAO)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
+        GL.glEnable(GL.GL_DEPTH_TEST)
 
         # reset states
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0)

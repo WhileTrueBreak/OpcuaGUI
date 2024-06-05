@@ -9,7 +9,6 @@ def normalize(v):
        return v
     return v / norm
 
-@functools.lru_cache(maxsize=3)
 def createProjectionMatrix(width, height, FOV, NEAR_PLANE, FAR_PLANE):
     aspectRatio = 1
     if height != 0:

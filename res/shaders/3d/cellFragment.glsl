@@ -9,10 +9,14 @@ in vec2 texPos;
 
 uniform sampler2D screen;
 uniform usampler2D picking;
+uniform sampler2D depth;
 
-void main() {
+float linearize_depth(float d,float zNear,float zFar) {
+	// return (1/(d*(1/zFar-1/zNear)+1/zNear)-zNear)/(zFar-zNear);
+	return (d*zNear)/(zFar+d*zNear-d*zFar);
+}
 
-	ivec2 coords = ivec2(gl_FragCoord.xy);
+bool is_edge(ivec2 coords){
 
 	uvec3 v0 = texelFetch(picking, coords, 0).xyz;
 	oPicking = v0;
@@ -23,13 +27,28 @@ void main() {
 	uvec2 v4 = texelFetch(picking, ivec2(coords.x, coords.y-1), 0).xy;
 
 	float dist = max(max(length(v0.xy-v1), length(v0.xy-v2)),max(length(v0.xy-v3), length(v0.xy-v4)));
+	return dist > 0.01;
+}
 
-	if(dist > 0.01){
-		frag = texelFetch(screen, coords, 0) - vec4(0.3,0.3,0.3,0);
-		// frag = vec4(1,0,0.6,1);
-	}else{
-		frag = texelFetch(screen, coords, 0);
-		// frag = vec4(0.3,0,0.6,1);
+float get_normalised_depth(vec2 res){
+	float d = texture(depth, res).x;
+	if (d != 1) {
+		d = linearize_depth(d, 0.01, 100);
 	}
+	return 1-d;
+}
+
+vec4 pixelate(vec2 coords, float pixel_size) {
+	ivec2 pp = ivec2(floor(coords/pixel_size)*pixel_size);
+	return texelFetch(screen, pp, 0);
+}
+
+
+void main() {
+	ivec2 coords = ivec2(gl_FragCoord.xy);
+	vec2 res = gl_FragCoord.xy / texture_dim;
+	float d = get_normalised_depth(res);
+
+	frag = texture(screen, res)*d;
 
 }

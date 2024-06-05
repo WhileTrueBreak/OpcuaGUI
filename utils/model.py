@@ -3,7 +3,7 @@ import os, io, sys
 
 from stl import mesh as stlmesh
 import pywavefront
-from vedo import Mesh
+# from vedo import Mesh
 import numpy as np
 
 from utils.debug import *
