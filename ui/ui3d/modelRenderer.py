@@ -384,6 +384,13 @@ class Renderer:
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+        
+        self.ppBufferTexture = GL.glGenTextures(1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.ppBufferTexture)
+        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA16F, textureDim[0], textureDim[1], 0, GL.GL_RGBA, GL.GL_HALF_FLOAT, None)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
         self.pickingTexture = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.pickingTexture)
@@ -443,6 +450,8 @@ class Renderer:
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.pickingTexture)
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB16UI, textureDim[0], textureDim[1], 0, GL.GL_RGB_INTEGER, GL.GL_UNSIGNED_INT, None)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.opaqueTexture)
+        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA16F, textureDim[0], textureDim[1], 0, GL.GL_RGBA, GL.GL_HALF_FLOAT, None)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.ppBufferTexture)
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA16F, textureDim[0], textureDim[1], 0, GL.GL_RGBA, GL.GL_HALF_FLOAT, None)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.depthTexture)
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_DEPTH_COMPONENT, textureDim[0], textureDim[1], 0, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT, None)
@@ -649,7 +658,7 @@ class Renderer:
 
         if self.supportTransparency:
             # config states
-            GL.glDepthMask(GL.GL_FALSE)
+            # GL.glDepthMask(GL.GL_FALSE)
             GL.glEnable(GL.GL_BLEND)
             GL.glBlendFunci(0, GL.GL_ONE, GL.GL_ONE)
             GL.glBlendFunci(1, GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_COLOR)
@@ -668,7 +677,7 @@ class Renderer:
                 batch.render()
 
             # config states
-            GL.glDepthMask(GL.GL_TRUE)
+            # GL.glDepthMask(GL.GL_TRUE)
             GL.glDepthFunc(GL.GL_ALWAYS)
             GL.glEnable(GL.GL_BLEND)
             GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
@@ -699,9 +708,13 @@ class Renderer:
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.opaqueFBO)
         GL.glUseProgram(Assets.CELL_SHADER)
 
+        GL.glCopyImageSubData(self.opaqueTexture, GL.GL_TEXTURE_2D, 0, 0, 0, 0,
+                            self.ppBufferTexture, GL.GL_TEXTURE_2D, 0, 0, 0, 0,
+                            *self.window.dim, 1)
+
         GL.glUniform2f(GL.glGetUniformLocation(Assets.CELL_SHADER, "texture_dim"), *self.window.dim)
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.opaqueTexture)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.ppBufferTexture)
         GL.glUniform1i(GL.glGetUniformLocation(Assets.CELL_SHADER, "screen"), 0)
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.pickingTexture)
