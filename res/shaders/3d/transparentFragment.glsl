@@ -10,29 +10,51 @@ uniform uint batchId;
 
 flat in uint objIndex;
 flat in int texId;
-in float shade;
 in vec2 texCoord;
-in vec4 color;
+in vec4 worldPos;
+in vec4 worldNormal;
+flat in vec3 cameraPos;
+flat in vec3 lightPos;
+in vec4 objectColor;
+in vec4 lightColor;
+
+// in float shade;
+// in vec2 texCoord;
+// in vec4 color;
+
+vec3 toV1(vec3 v1, vec3 v2){
+  return normalize(v1-v2);
+}
 
 void main(){
-	if(color.a <= 0.05) discard;
-
+	if(objectColor.a <= 0.05) discard;
 	picking = uvec3(objIndex, batchId, gl_PrimitiveID+1);
-	vec4 objColor = vec4(0,0,0,0);
-	if(texId >= 0){
-		vec4 textureColor = texture(uTextures[texId], texCoord);
-		vec4 baseColor = vec4(color.rgb*shade, color.a);
-		objColor = vec4(textureColor.r*baseColor.r, textureColor.g*baseColor.r, textureColor.b*baseColor.b, baseColor.a);
-	}else {
-		objColor = vec4(color.rgb*shade, color.a);
-	}
+
+	// vec4 objColor = vec4(0,0,0,0);
+	// if(texId >= 0){
+	// 	vec4 textureColor = texture(uTextures[texId], texCoord);
+	// 	vec4 baseColor = vec4(color.rgb*shade, color.a);
+	// 	objColor = vec4(textureColor.r*baseColor.r, textureColor.g*baseColor.r, textureColor.b*baseColor.b, baseColor.a);
+	// }else {
+	// 	objColor = vec4(color.rgb*shade, color.a);
+	// }
+
+	//ambient
+	float ambient = 0.2;
+
+	// diffuse
+	vec3 toLightVec = toV1(lightPos, worldPos.xyz);
+	vec3 toCameraVec = toV1(cameraPos, worldPos.xyz);
+  	float diffuse = dot(toLightVec, normalize(worldNormal.xyz));
+	
+	//specular
+	vec3 halfway = normalize((toLightVec+toV1(cameraPos, worldPos.xyz))/2);
+  	float specular = pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),16);
+
+	vec4 objColor = vec4(objectColor.xyz*min(ambient+diffuse+specular, 1), objectColor.a);
 
 	// weight function
 	float weight = clamp(pow(min(1.0, objColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
-	
-	// store pixel color accumulation
 	accum = vec4(objColor.rgb * objColor.a, objColor.a) * weight;
-	
-	// store pixel revealage threshold
 	reveal = objColor.a;
 }
