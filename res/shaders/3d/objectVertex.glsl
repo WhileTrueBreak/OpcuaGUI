@@ -24,7 +24,6 @@ out vec2 texCoord;
 out vec4 worldPos;
 out vec4 worldNormal;
 flat out vec3 cameraPos;
-flat out vec3 lightPos;
 out vec4 objectColor;
 out vec4 lightColor;
 
@@ -41,8 +40,6 @@ void main() {
   objIndex = uint(index);
   texId = int(texIndex);
   texCoord = uv;
-
-  lightPos = vec3(7, 4, 2.5);
 
   mat4 invVeiwMat = inverse(viewMatrix);
   cameraPos = vec3(invVeiwMat[3][0], invVeiwMat[3][1], invVeiwMat[3][2]);

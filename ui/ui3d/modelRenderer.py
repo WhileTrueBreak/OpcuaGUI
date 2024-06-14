@@ -33,6 +33,8 @@ class Renderer:
         self.batchIdMap = {}
         self.nextId = 0
 
+        self.pointLight = (7, 4, 2.5)
+
         self.projectionMatrix = np.identity(4)
         self.viewMatrix = np.identity(4)
 
@@ -41,6 +43,7 @@ class Renderer:
         self.batches = []
 
         self.__initCompositeLayers()
+        self.__initLight()
     
     @timing
     def __initCompositeLayers(self):
@@ -79,6 +82,24 @@ class Renderer:
 
         self.rendererFBO = RendererFBO(self.window.dim)
         self.shadowCubeFBO = ShadowCubeFBO(1000)
+
+    @timing
+    def __initLight(self):
+        GL.glUseProgram(self.opaqueShader)
+        shaderLightWorldPos = GL.glGetUniformLocation(self.opaqueShader, 'lightPos')
+        GL.glUniform3fv(shaderLightWorldPos, 1, self.pointLight)
+
+        GL.glUseProgram(self.transparentShader)
+        shaderLightWorldPos = GL.glGetUniformLocation(self.transparentShader, 'lightPos')
+        GL.glUniform3fv(shaderLightWorldPos, 1, self.pointLight)
+
+        GL.glUseProgram(Assets.SHADOW_SHADER)
+        shaderLightWorldPos = GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightWorldPos')
+        GL.glUniform3fv(shaderLightWorldPos, 1, self.pointLight)
+
+        self.lightProjMatrix = createProjectionMatrix(self.shadowCubeFBO.shadowCubeMapSize, self.shadowCubeFBO.shadowCubeMapSize, 90, 0.01, 100)
+        GL.glUniformMatrix4fv(GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightProjectionMatrix'), 1, GL.GL_FALSE, self.lightProjMatrix)
+        self.lightViewMatLoc = GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightViewMatrix')
 
     @timing
     def updateCompositeLayers(self):
@@ -176,46 +197,27 @@ class Renderer:
         GL.glDepthFunc(GL.GL_LESS)
         GL.glDepthMask(GL.GL_TRUE)
         GL.glDisable(GL.GL_BLEND)
-
-        shaderLightWorldPos = GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightWorldPos')
-        GL.glUniform3fv(shaderLightWorldPos, 1, lightPos)
-
-        lightProjMatrix = createProjectionMatrix(self.shadowCubeFBO.shadowCubeMapSize, self.shadowCubeFBO.shadowCubeMapSize, 90, 0.01, 100)
-        GL.glUniformMatrix4fv(GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightProjectionMatrix'), 1, GL.GL_FALSE, lightProjMatrix)
-        viewMatLoc = GL.glGetUniformLocation(Assets.SHADOW_SHADER, 'lightViewMatrix')
-
         GL.glClearColor(GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX)
 
         for i in range(6):
-            # print(f'face: {i}')
             face, target, up = self.shadowCubeFBO.getFaceInfo(i)
-            # print(face)
             self.shadowCubeFBO.bindShadowFBO(face)
             GL.glClear(GL.GL_DEPTH_BUFFER_BIT|GL.GL_COLOR_BUFFER_BIT)
             lightViewMatrix = createViewMatrixLookAt(lightPos, np.array(lightPos)+np.array(target), up)
-            lightFrustum = getFrustum(np.matmul(lightProjMatrix.T, lightViewMatrix))
+            lightFrustum = getFrustum(np.matmul(self.lightProjMatrix.T, lightViewMatrix))
 
             if GL.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER) != GL.GL_FRAMEBUFFER_COMPLETE:
                 raise('frame buffer not complete')
 
-            GL.glUniformMatrix4fv(viewMatLoc, 1, GL.GL_TRUE, lightViewMatrix)
-            # print(data)
-
+            GL.glUniformMatrix4fv(self.lightViewMatLoc, 1, GL.GL_TRUE, lightViewMatrix)
             for batch in self.solidBatch:
-                batch.render(frustum=None)
-
-            # get data
-            GL.glBindFramebuffer(GL.GL_READ_FRAMEBUFFER, self.shadowCubeFBO.shadowFBO)
-            GL.glReadBuffer(GL.GL_COLOR_ATTACHMENT0)
-            data = GL.glReadPixels(0, 0, 10, 10, GL.GL_RED, GL.GL_FLOAT, None)
-            GL.glBindFramebuffer(GL.GL_READ_FRAMEBUFFER, 0)
-            # print(data)
-            # end
-
+                batch.render(frustum=lightFrustum)
+            
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0)
         GL.glViewport(*oldViewport)
         return
 
+    @timing
     def render(self):
         # remember previous values
         depthFunc = GL.glGetIntegerv(GL.GL_DEPTH_FUNC)
@@ -225,7 +227,7 @@ class Renderer:
         clearColor = GL.glGetFloatv(GL.GL_COLOR_CLEAR_VALUE)
 
         # get shadow
-        self.__shadowPass((7, 4, 2.5))
+        self.__shadowPass(self.pointLight)
         GL.glActiveTexture(GL.GL_TEXTURE8)
         GL.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, self.shadowCubeFBO.shadowCubeMap)
 

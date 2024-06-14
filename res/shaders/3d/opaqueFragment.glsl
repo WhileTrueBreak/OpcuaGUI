@@ -7,6 +7,7 @@ layout (location = 1) out uvec3 picking;
 uniform sampler2D uTextures[%max_textures%];
 uniform uint batchId;
 uniform samplerCube shadowMap;
+uniform vec3 lightPos;
 
 flat in uint objIndex;
 flat in int texId;
@@ -14,7 +15,6 @@ in vec2 texCoord;
 in vec4 worldPos;
 in vec4 worldNormal;
 flat in vec3 cameraPos;
-flat in vec3 lightPos;
 in vec4 objectColor;
 in vec4 lightColor;
 
@@ -51,7 +51,7 @@ void main() {
 	opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse+specular), 1);
 
 	// light shadow stuff
-	vec3 toLight = worldPos.xyz - vec3(7, 4, 2.5);
+	vec3 toLight = worldPos.xyz - lightPos;
 	toLight.x = toLight.x;
 	toLight.y = -toLight.y;
 	toLight.z = -toLight.z;

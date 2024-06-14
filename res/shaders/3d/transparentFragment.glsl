@@ -8,6 +8,7 @@ layout (location = 2) out uvec3 picking;
 uniform sampler2D uTextures[%max_textures%];
 uniform uint batchId;
 uniform samplerCube shadowMap;
+uniform vec3 lightPos;
 
 flat in uint objIndex;
 flat in int texId;
@@ -15,7 +16,6 @@ in vec2 texCoord;
 in vec4 worldPos;
 in vec4 worldNormal;
 flat in vec3 cameraPos;
-flat in vec3 lightPos;
 in vec4 objectColor;
 in vec4 lightColor;
 
@@ -44,6 +44,17 @@ void main(){
   	float specular = clamp(pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),16), 0, 1);
 
 	vec4 objColor = vec4(objectColor.xyz*(ambient+diffuse+specular), objectColor.a);
+
+	// light shadow stuff
+	vec3 toLight = worldPos.xyz - lightPos;
+	toLight.x = toLight.x;
+	toLight.y = -toLight.y;
+	toLight.z = -toLight.z;
+	float lightDist = length(toLight); 
+	float sampleDist = texture(shadowMap, toLight).r;
+	if(sampleDist + 0.1 < lightDist){
+		objColor = vec4(objectColor.xyz*(ambient), 1);
+	}
 
 	// weight function
 	float weight = clamp(pow(min(1.0, objColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
