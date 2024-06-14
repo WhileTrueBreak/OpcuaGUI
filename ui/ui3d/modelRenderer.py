@@ -456,3 +456,7 @@ class Renderer:
                 self.idDict[id][i] = (batchId, objId)
                 self.idDict[(batchId, objId)] = id
 
+    def setLight(self, pointLight):
+        self.pointLight = pointLight
+        self.__initLight()
+

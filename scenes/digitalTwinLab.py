@@ -38,6 +38,9 @@ class DigitalTwinLab(Scene):
         self.models = []
         
         self.camera = MovingCamera(self.window, [7, 4, 2.5, -90, 0, 0], 2)
+        
+        self.pointLight = (10, 4, 2.5)
+        self.lapsed = 0
     @timing
     def createUi(self):
         self.renderWindow = Ui3DScene(self.window, Constraints.ALIGN_PERCENTAGE_PADDING(0, 0, 1, 1, DigitalTwinLab.UI_PADDING), supportTransparency=True)
@@ -287,7 +290,10 @@ class DigitalTwinLab(Scene):
         for model in self.models:
             if not isinstance(model, Updatable): continue
             model.update(delta)
-
+        
+        self.pointLight = (7 + 2*cos(self.lapsed/4), 4 + 2*sin(self.lapsed/4), 2.5)
+        self.lapsed += delta
+        self.modelRenderer.setLight(self.pointLight)
         return
     
     # @timing

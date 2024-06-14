@@ -58,6 +58,6 @@ void main() {
 	float lightDist = length(toLight); 
 	float sampleDist = texture(shadowMap, toLight).r;
 	if(sampleDist + 0.1 < lightDist){
-		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient), 1);
+		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse/4), 1);
 	}
 }
