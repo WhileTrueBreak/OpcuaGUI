@@ -89,13 +89,13 @@ float srgb2grey(vec3 rgb){
 }
 
 float quantize(float grey, int num){
-	if(grey == 1) return 1.0;
+	if(grey >= 1) return 1.0;
 	return floor(grey*num)/(num-1);
 }
 
 int quantizeindex(float grey, int num){
-	if(grey == num) return (num-1);
-	return int(floor(grey*num));
+	if(grey >= 1) return (num-1);
+	return int(grey*num);
 }
 
 vec3 rgb2hsv(vec3 c){
@@ -122,26 +122,27 @@ void main() {
 	ivec2 coords = ivec2(gl_FragCoord.xy);
 	vec2 res = gl_FragCoord.xy / texture_dim;
 	vec4 color = texture(screen, res);
-	float d = get_normalised_depth(res);
-	float nd = 1-d;
 
-	float dist = dist_sq(res, vec2(0.5,0.5));
-	vec2 distort_res = quad_distort(res, 0.15, 0.85);
-	float xoff = pow(sin((distort_res.y*texture_dim.y+2)*PI/16), 4.)/1*dist;
-	float brightness = sin(distort_res.y*texture_dim.y*PI/4)+1;
-	if(brightness > 1) brightness = 1;
-	if(brightness < 0.8) brightness = 0.9;
+	// float d = get_normalised_depth(res);
+	// float nd = 1-d;
 
-	xoff = xoff/texture_dim.x;
-	float resoff = res.x+xoff;
-	if(resoff <= 0) xoff = 0;
-	if(resoff >= 1) xoff = 0;
-	res = vec2(distort_res.x+xoff, distort_res.y);
-	float grey = srgb2grey(color.rgb);
-	grey = quantize(grey, 8);
+	// float dist = dist_sq(res, vec2(0.5,0.5));
+	// vec2 distort_res = quad_distort(res, 0.15, 0.85);
+	// float xoff = pow(sin((distort_res.y*texture_dim.y+2)*PI/16), 4.)/1*dist;
+	// float brightness = sin(distort_res.y*texture_dim.y*PI/4)+1;
+	// if(brightness > 1) brightness = 1;
+	// if(brightness < 0.8) brightness = 0.9;
+
+	// xoff = xoff/texture_dim.x;
+	// float resoff = res.x+xoff;
+	// if(resoff <= 0) xoff = 0;
+	// if(resoff >= 1) xoff = 0;
+	// res = vec2(distort_res.x+xoff, distort_res.y);
+
+	float grey = clamp(srgb2grey(color.rgb),0,1);
 	int colorindex = quantizeindex(grey, 8);
-	vec3 palettecolor = palette(0.7, 0.02, 0.5, 0.6, 0.03, colorindex);
+	vec3 palettecolor = palette(0.65, 0.02, 0.5, 0.6, 0.03, colorindex);
 	frag = vec4(palettecolor, 1);
-
+	frag = color;
 
 }

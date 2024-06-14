@@ -7,6 +7,7 @@ layout (location = 2) out uvec3 picking;
 
 uniform sampler2D uTextures[%max_textures%];
 uniform uint batchId;
+uniform samplerCube shadowMap;
 
 flat in uint objIndex;
 flat in int texId;
@@ -30,28 +31,19 @@ void main(){
 	if(objectColor.a <= 0.05) discard;
 	picking = uvec3(objIndex, batchId, gl_PrimitiveID+1);
 
-	// vec4 objColor = vec4(0,0,0,0);
-	// if(texId >= 0){
-	// 	vec4 textureColor = texture(uTextures[texId], texCoord);
-	// 	vec4 baseColor = vec4(color.rgb*shade, color.a);
-	// 	objColor = vec4(textureColor.r*baseColor.r, textureColor.g*baseColor.r, textureColor.b*baseColor.b, baseColor.a);
-	// }else {
-	// 	objColor = vec4(color.rgb*shade, color.a);
-	// }
-
 	//ambient
-	float ambient = 0.2;
+	float ambient = 0.35;
 
 	// diffuse
 	vec3 toLightVec = toV1(lightPos, worldPos.xyz);
 	vec3 toCameraVec = toV1(cameraPos, worldPos.xyz);
-  	float diffuse = dot(toLightVec, normalize(worldNormal.xyz));
+  	float diffuse = clamp(dot(toLightVec, normalize(worldNormal.xyz)), 0, 1)*0.8;
 	
 	//specular
 	vec3 halfway = normalize((toLightVec+toV1(cameraPos, worldPos.xyz))/2);
-  	float specular = pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),16);
+  	float specular = clamp(pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),16), 0, 1);
 
-	vec4 objColor = vec4(objectColor.xyz*min(ambient+diffuse+specular, 1), objectColor.a);
+	vec4 objColor = vec4(objectColor.xyz*(ambient+diffuse+specular), objectColor.a);
 
 	// weight function
 	float weight = clamp(pow(min(1.0, objColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);

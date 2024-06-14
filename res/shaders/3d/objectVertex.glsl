@@ -4,6 +4,8 @@
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
+uniform samplerCube shadowMap;
+
 layout (std430, binding = 0) buffer transformationMatrices {
   mat4 TMAT[];
 };
@@ -40,27 +42,17 @@ void main() {
   texId = int(texIndex);
   texCoord = uv;
 
-  lightPos = vec3(7, 4, 2);
-
-  // vec3 lightVec1 = normalize(vec3(-0.5, -2, 1));
-  // vec3 lightVec2 = normalize(vec3(0.5, 2, -0.5));
-
-  // float shade1 = dot(lightVec1, normalize(tnormal.xyz))/2+0.5;
-  // float shade2 = dot(lightVec2, normalize(tnormal.xyz))/2+0.5;
-  // shade = max(shade1, shade2);
+  lightPos = vec3(7, 4, 2.5);
 
   mat4 invVeiwMat = inverse(viewMatrix);
   cameraPos = vec3(invVeiwMat[3][0], invVeiwMat[3][1], invVeiwMat[3][2]);
 
   worldPos = TMAT[matIndex] * vec4(vertexPos, 1.0);
   worldNormal = TMAT[matIndex] * vec4(vertexNormal, 0.0);
-  // vec3 toLightVec = toLight(cameraPos, worldPos.xyz);
-  // float diffuse = dot(toLightVec, normalize(tnormal.xyz));
 
   vec4 relPos = viewMatrix * worldPos;
   vec4 screenPos = projectionMatrix*relPos;
 
-  // shade = diffuse;
   objectColor = vertexColor;
   lightColor = vec4(1, 1, 1, 1);
   gl_Position = screenPos;

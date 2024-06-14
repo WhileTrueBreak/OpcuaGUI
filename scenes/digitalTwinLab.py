@@ -37,7 +37,7 @@ class DigitalTwinLab(Scene):
         super().__init__(window, name)
         self.models = []
         
-        self.camera = MovingCamera(self.window, [0, 0, 1.5, -90, 0, 45], 2)
+        self.camera = MovingCamera(self.window, [7, 4, 2.5, -90, 0, 0], 2)
     @timing
     def createUi(self):
         self.renderWindow = Ui3DScene(self.window, Constraints.ALIGN_PERCENTAGE_PADDING(0, 0, 1, 1, DigitalTwinLab.UI_PADDING), supportTransparency=True)
@@ -144,7 +144,7 @@ class DigitalTwinLab(Scene):
     def __addRobots(self):
         self.bases = []
         # # ROBOT 3 - KEENANS DEMO ROBOT
-        base = KukaBase(self.modelRenderer, Assets.KUKA_FLEX, (23, 3), posParams=(0,0,0,True))
+        base = KukaBase(self.modelRenderer, Assets.KUKA_FLEX, (23, 3), posParams=(4,4,0,True))
         base.setAttachTransform(createTransformationMatrix(0, 0, 0.89, 0, 0, 0))
         arm = KukaRobotTwin(self.window, createTransformationMatrix(0.315, 0, 0, 0, 0, 0), 23, 'R3', self.modelRenderer, hasForceVector=True, hasGripper=True)
         arm.setLiveColors([(1, 51/255, 51/255, 0.7)for i in range(9)])
@@ -204,20 +204,17 @@ class DigitalTwinLab(Scene):
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73,6.6,0.5,0,0,-90)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73,6.6,1.35,0,0,-90)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73+0.73,6.6,0.5,0,0,-90)))
-        self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
+        # self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73+0.73,6.6,1.35,0,0,-90)))
-        self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
-
-        # tmp = SimpleModel(self.modelRenderer, Assets.TEAPOT0, np.matmul(createTransformationMatrix(6,3,1,0,0,0),createScaleMatrix(10,10,10)))
-        # self.models.append(tmp)
+        # self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
 
         self.models.append(SimpleModel(self.modelRenderer, Assets.THE_MATRIX, createTransformationMatrix(5.6,6,0,0,0,0)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.KUKA_EDU, createTransformationMatrix(4,1.2,0,0,0,-90)))
 
         self.leftBtn = SimpleModel(self.modelRenderer, Assets.ARROW_BTN, np.matmul(createTransformationMatrix(4.3,6.5,0.85,0,0,180),createScaleMatrix(8, 8, 8)))
         self.rightBtn = SimpleModel(self.modelRenderer, Assets.ARROW_BTN, np.matmul(createTransformationMatrix(4.7,6.5,0.85,0,0,0),createScaleMatrix(8, 8, 8)))
-        self.modelRenderer.setColor(self.leftBtn.modelId, (0.3,1,0.7,0.7))
-        self.modelRenderer.setColor(self.rightBtn.modelId, (0.3,1,0.7,0.7))
+        self.modelRenderer.setColor(self.leftBtn.modelId, (0.3,1,0.7,1))
+        self.modelRenderer.setColor(self.rightBtn.modelId, (0.3,1,0.7,1))
         self.models.append(self.leftBtn)
         self.models.append(self.rightBtn)
 
@@ -246,6 +243,7 @@ class DigitalTwinLab(Scene):
         for key in self.streamDict.keys():
             for display in self.streamDict[key]:
                 self.modelRenderer.setTexture(display.modelId, key.texture)
+        return
 
     def handleUiEvents(self, event):
         for model in self.models:
@@ -311,7 +309,7 @@ class DigitalTwinLab(Scene):
             if not hasattr(model, 'inViewFrustrum'): continue
             if not hasattr(model, 'setViewFlag'): continue
             inView = model.inViewFrustrum(self.modelRenderer.projectionMatrix, self.modelRenderer.viewMatrix)
-            model.setViewFlag(inView)
+            # model.setViewFlag(inView)
 
     # @timing
     def __updateModelPos(self):

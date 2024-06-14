@@ -67,6 +67,24 @@ def createViewMatrix(x, y, z, rotx, roty, rotz):
     rot = createTransformationMatrix(0, 0, 0, rotx, roty, rotz)
     return rot.dot(trans)
 
+def createViewMatrixLookAt(pos, target, up):
+    z = normalize(np.array(target)-np.array(pos))
+    x = normalize(np.cross(np.array(up), z))
+    y = np.cross(z, x)
+
+    view = np.eye(4)
+    view[0,:3] = x
+    view[1,:3] = y
+    view[2,:3] = z
+    view[0,3] = -np.dot(x, pos)
+    view[1,3] = -np.dot(y, pos)
+    view[2,3] = -np.dot(z, pos)
+    # view[0,2] *= -1
+    # view[1,2] *= -1
+    # view[2,2] *= -1
+    # view[3,2] *= -1
+    return view
+
 def vectorTransform(p1, p2, thickness, upperLimit=10000000):
     vector = p2-p1
     mag = np.linalg.norm(vector)

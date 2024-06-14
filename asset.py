@@ -43,8 +43,9 @@ class Assets:
         Assets.OPAQUE_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/opaqueFragment.glsl')
         Assets.TRANSPARENT_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/transparentFragment.glsl')
         Assets.COMPOSITE_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/compositeFragment.glsl')
-        Assets.CELL_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/cellFragment.glsl')
-        
+        Assets.POST_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/postFragment.glsl')
+        Assets.SHADOW_SHADER = Assets.linkShaders('res/shaders/3d/shadowPointVertex.glsl', 'res/shaders/3d/shadowPointFragment.glsl')
+
         Assets.KUKA_IIWA14_MODEL = [None]*8
         Assets.KUKA_IIWA14_MODEL[0] = Assets.loadModelFile('res/models/iiwa14/visual/link_0.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
         Assets.KUKA_IIWA14_MODEL[1] = Assets.loadModelFile('res/models/iiwa14/visual/link_1.stl', createTransformationMatrix(0,0,-(0.36-0.1575), 0, 0, 0))
@@ -82,8 +83,8 @@ class Assets:
         Assets.AMW_RIGHT_TEX = Assets.loadTexture('res/textures/AMW_RIGHT.jpg', flipX=False, flipY=True)
         Assets.AMW_MID_TEX = Assets.loadTexture('res/textures/AMW_MID.jpg', flipX=True, flipY=True)
 
-        Assets.DRAGON = Assets.loadModelFile('res/models/dragon.obj', createScaleMatrix(0.01, 0.01, 0.01).dot(createTransformationMatrix(0,0,0,90,0,0)))
-        Assets.TEAPOT0 = Assets.loadModelFile('res/models/teapot.obj')
+        # Assets.DRAGON = Assets.loadModelFile('res/models/dragon.obj', createScaleMatrix(0.01, 0.01, 0.01).dot(createTransformationMatrix(0,0,0,90,0,0)))
+        # Assets.TEAPOT0 = Assets.loadModelFile('res/models/teapot.obj')
         # Assets.TEAPOT1 = Assets.loadModelFile('res/models/teapot1.obj')
         # Assets.SWORD = Assets.loadModelFile('res/models/sword.obj')
         Assets.POLE = Assets.loadModelFile('res/models/pole.stl', createScaleMatrix(10, 10, 10))
@@ -92,15 +93,15 @@ class Assets:
         Assets.PRUSA_XL = Assets.loadModelFile('res/models/Prusa XLm.STL')
         Assets.SHELF = Assets.loadModelFile('res/models/Objects/Shelving1.stl', createTransformationMatrix(0, 0, 0, 90, 0, 0))
 
-        Assets.BAD_APPLE_VID = Assets.loadVideo('res/videos/badapple.mp4')
-        Assets.HAMSTER = Assets.loadVideo('res/videos/hamster.gif')
+        # Assets.BAD_APPLE_VID = Assets.loadVideo('res/videos/badapple.mp4')
+        # Assets.HAMSTER = Assets.loadVideo('res/videos/hamster.gif')
 
         Assets.CUBE_TEX = Assets.loadTexture('res/textures/cube.jpg', flipY=True)
         
-        Assets.LEFT_ARROW = Assets.loadTexture('res/textures/arrow.png')
-        Assets.UP_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=90)
-        Assets.RIGHT_ARROW = Assets.loadTexture('res/textures/arrow.png', flipX=True)
-        Assets.DOWN_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=270)
+        # Assets.LEFT_ARROW = Assets.loadTexture('res/textures/arrow.png')
+        # Assets.UP_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=90)
+        # Assets.RIGHT_ARROW = Assets.loadTexture('res/textures/arrow.png', flipX=True)
+        # Assets.DOWN_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=270)
 
         Assets.MONACO_FONT = Assets.loadFont('res/fonts/MONACO.TTF')
         Assets.COMIC_SANS_FONT = Assets.loadFont('res/fonts/comic_sans.ttf')
@@ -108,6 +109,12 @@ class Assets:
 
         Assets.ARROW_BTN = Assets.loadModelFile('res/models/arrowbtn.STL', np.matmul(createScaleMatrix(0.001, 0.001, 0.001), createTransformationMatrix(-15,15,0,90,0,0)))
 
+        Assets.initPlanes()
+        Assets.INIT = True
+    
+    @staticmethod
+    @timing
+    def initPlanes():
         floorVertices = [
             [0,0,0],[1,0,0],[0,1,0],
             [0,1,0],[1,0,0],[1,1,0],
@@ -129,8 +136,7 @@ class Assets:
             [0, 1, 0.0, 0, 0],[ 1, 1, 0.0, 0, 1],[ 1, 0, 0.0, 1, 1],
         ]
         Assets.SCREENSQ = Assets.loadModelVertices(vertices=screenVertices1)
-
-        Assets.INIT = True
+    
     @staticmethod
     @timing
     def loadFont(fontFile, size=48*64):
