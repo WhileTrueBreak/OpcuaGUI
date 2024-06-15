@@ -171,7 +171,6 @@ class BatchRenderer:
         GL.glBindVertexArray(0)
         self.isDirty = False
 
-    @funcProfiler(ftype='3drender')
     def render(self, frustum=None):
         # print(f"trans:{self.isTransparent} | dirty:{self.isDirty} | size:{self.currentIndex} | tex:{len(self.textures)}")
 

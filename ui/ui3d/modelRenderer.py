@@ -187,7 +187,7 @@ class Renderer:
         self.batches[-1].setProjectionMatrix(self.projectionMatrix)
         self.batches[-1].setViewMatrix(self.viewMatrix)
     
-    @funcProfiler(ftype='3drender')
+    @funcProfiler(ftype='3dshadow')
     def __shadowPass(self, lightPos):
         oldViewport = GL.glGetIntegerv(GL.GL_VIEWPORT)
 
@@ -218,6 +218,7 @@ class Renderer:
             
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0)
         GL.glViewport(*oldViewport)
+        GL.glFinish() #TODO: (for debug) remove this later 
         return
 
     @funcProfiler(ftype='3drender')
