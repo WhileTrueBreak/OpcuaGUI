@@ -1,6 +1,7 @@
 from ui.glElement import GlElement
 from ui.uiRenderer import UiRenderer
 
+from utils.debug import *
 from utils.transform import Transform
 
 from asset import *
@@ -28,6 +29,7 @@ class UiBlock(GlElement):
         self.renderer.setDirtyVertex()
         return
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         return
 

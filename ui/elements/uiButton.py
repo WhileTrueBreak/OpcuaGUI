@@ -32,6 +32,7 @@ class UiButton(GlElement):
         self.renderer.setDirtyVertex()
         return
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         return
 

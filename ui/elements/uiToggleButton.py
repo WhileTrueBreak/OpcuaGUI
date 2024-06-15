@@ -35,6 +35,7 @@ class UiToggleButton(GlElement):
         self.renderer.setDirtyVertex()
         return
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         if self.isDirty:
             self.currentColor = self.toggleColor if self.toggled else self.untoggledColor

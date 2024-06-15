@@ -98,11 +98,13 @@ class UiText(GlElement):
         self.__updateRenderer()
         return
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         if self.dirtyText:
             self.reshape()
         return
     
+    @funcProfiler(ftype='textupdate')
     def __updateTextScale(self):
         self.currScale = (1,1) #self.window.getWindowScale()
         if self.prevWindowScale[1] == self.currScale[1]: return
@@ -111,6 +113,7 @@ class UiText(GlElement):
         self.prevWindowScale = self.currScale
         self.dirtyText = True
 
+    @funcProfiler(ftype='textupdate')
     def __updateTextBound(self):
         if not self.dirtyText: return
         scale = self.scaledFontSize/48
@@ -147,6 +150,7 @@ class UiText(GlElement):
             self.updateHeight(ABSOLUTE(T_H, self.maxDescender + self.maxAscender))
         self.dirtyText = False
 
+    @funcProfiler(ftype='textrender')
     def __updateRenderTexture(self, text, font):
         scale = self.scaledFontSize/48
 
@@ -203,6 +207,7 @@ class UiText(GlElement):
         GL.glClearColor(*clearColor)
         GL.glViewport(0, 0, *self.window.dim)
 
+    @funcProfiler(ftype='uiupdate')
     def __updateRenderer(self):
         screenCoords = [
             (self.openGLDim[0], self.openGLDim[1]),

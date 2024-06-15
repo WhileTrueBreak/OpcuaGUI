@@ -1,3 +1,5 @@
+import OpenGL.GL as GL
+
 from ui.elements.uiWrapper import UiWrapper
 from ui.uiBatch import UiBatch
 
@@ -17,6 +19,7 @@ class UiLayer:
 
         self.batches = []
     
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         if self.window.resized:
             for batch in self.batches:
@@ -28,11 +31,14 @@ class UiLayer:
             self.__updateRenderers()
         self.masterElem.recUpdate(delta)
 
+    @funcProfiler(ftype='uirender')
     def render(self):
         for batch in self.batches:
             batch.render()
+        GL.glFinish()
         return
 
+    @funcProfiler(ftype='uiupdate')
     @timing
     def __updateRenderers(self):
         self.batches = []
@@ -46,6 +52,7 @@ class UiLayer:
                 currentBatch.addRenderer(renderer)
         self.hasMasterListChanged = False
 
+    @funcProfiler(ftype='uiupdate')
     @timing
     def __updateMasterList(self):
         self.masterList = []
@@ -58,6 +65,7 @@ class UiLayer:
         self.masterElem.setCleanComponents()
         self.hasMasterListChanged = True
 
+    @funcProfiler(ftype='uiupdate')
     @timing
     def __updateMasterElem(self):
         self.masterElem.dim = (0,0,*self.window.dim)

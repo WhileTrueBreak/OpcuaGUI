@@ -105,6 +105,7 @@ class KukaRobot:
                     self.__getNodeName('d_RotC'),
                 ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
     
+    @funcProfiler(ftype='kukaupdate')
     def update(self, delta):
         self.__updateFromOpcua()
         self.__updateJoints()
@@ -536,6 +537,7 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
         # self.page1.addChild(self.sendBtn)
         # self.page1.addChild(self.unlinkBtn)
 
+    @funcProfiler(ftype='kukaupdate')
     def update(self, delta):
         self.liveRobot.update(delta)
         self.twinRobot.update(delta)

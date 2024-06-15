@@ -10,7 +10,7 @@ import traceback
 
 class BatchRenderer:
     # MAX_OBJECTS = 1000
-    MAX_VERTICES = 1000000
+    MAX_VERTICES = 500000
     MAX_TEXTURES = 0
     MAX_SSBO_SIZE = 0
 
@@ -171,6 +171,7 @@ class BatchRenderer:
         GL.glBindVertexArray(0)
         self.isDirty = False
 
+    @funcProfiler(ftype='3drender')
     def render(self, frustum=None):
         # print(f"trans:{self.isTransparent} | dirty:{self.isDirty} | size:{self.currentIndex} | tex:{len(self.textures)}")
 

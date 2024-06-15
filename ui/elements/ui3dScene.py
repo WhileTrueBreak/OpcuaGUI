@@ -44,6 +44,7 @@ class Ui3DScene(GlElement):
         self.modelRenderer.updateCompositeLayers()
         return
     
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         GL.glEnable(GL.GL_CULL_FACE)
         GL.glEnable(GL.GL_DEPTH_TEST)

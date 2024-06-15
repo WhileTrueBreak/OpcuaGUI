@@ -281,6 +281,7 @@ class DigitalTwinLab(Scene):
         self.modelRenderer.setTexture(self.screen.modelId, stream.texture)
 
     # @timing
+    @funcProfiler(ftype='sceneupdate')
     def update(self, delta):
         self.__updateEnv(delta)
         self.__updateModelPos()
@@ -291,7 +292,7 @@ class DigitalTwinLab(Scene):
             if not isinstance(model, Updatable): continue
             model.update(delta)
         
-        self.pointLight = (7 + 2*cos(self.lapsed/4), 4 + 2*sin(self.lapsed/4), 2.5)
+        self.pointLight = (7 + 1.5*cos(self.lapsed/4), 4 + 1.5*sin(self.lapsed/4), 2)
         self.lapsed += delta
         self.modelRenderer.setLight(self.pointLight)
         return

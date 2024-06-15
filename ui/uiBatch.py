@@ -131,6 +131,7 @@ class UiBatch:
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
         GL.glBindVertexArray(0)
     
+    @funcProfiler(ftype='uiupdate')
     @timing
     def updateFrame(self):
         textureDim = self.window.dim
@@ -142,6 +143,7 @@ class UiBatch:
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_DEPTH_COMPONENT, textureDim[0], textureDim[1], 0, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT, None)
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
+    @funcProfiler(ftype='uirender')
     def render(self):
 
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.renderFBO)
@@ -207,6 +209,7 @@ class UiBatch:
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glClearColor(*clearColor)
 
+    @funcProfiler(ftype='uirender')
     def rebuffer(self):
         GL.glBindVertexArray(self.vao)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbo)

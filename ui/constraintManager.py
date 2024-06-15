@@ -37,6 +37,7 @@ class ConstraintManager:
         self.pos = pos
         self.dim = dim
 
+    @funcProfiler(ftype='constraintupdate')
     def calcConstraints(self, *constraints):
         constraints = [*constraints]
         if len(set(c.toChange for c in constraints)) != 4:

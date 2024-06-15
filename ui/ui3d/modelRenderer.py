@@ -43,7 +43,7 @@ class Renderer:
         self.batches = []
 
         self.__initCompositeLayers()
-        self.__initLight()
+        self.__updateLight()
     
     @timing
     def __initCompositeLayers(self):
@@ -81,10 +81,9 @@ class Renderer:
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
         self.rendererFBO = RendererFBO(self.window.dim)
-        self.shadowCubeFBO = ShadowCubeFBO(1000)
+        self.shadowCubeFBO = ShadowCubeFBO(2000)
 
-    @timing
-    def __initLight(self):
+    def __updateLight(self):
         GL.glUseProgram(self.opaqueShader)
         shaderLightWorldPos = GL.glGetUniformLocation(self.opaqueShader, 'lightPos')
         GL.glUniform3fv(shaderLightWorldPos, 1, self.pointLight)
@@ -188,7 +187,7 @@ class Renderer:
         self.batches[-1].setProjectionMatrix(self.projectionMatrix)
         self.batches[-1].setViewMatrix(self.viewMatrix)
     
-    @timing
+    @funcProfiler(ftype='3drender')
     def __shadowPass(self, lightPos):
         oldViewport = GL.glGetIntegerv(GL.GL_VIEWPORT)
 
@@ -200,6 +199,7 @@ class Renderer:
         GL.glClearColor(GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX)
 
         for i in range(6):
+            # t1 = time.time_ns()
             face, target, up = self.shadowCubeFBO.getFaceInfo(i)
             self.shadowCubeFBO.bindShadowFBO(face)
             GL.glClear(GL.GL_DEPTH_BUFFER_BIT|GL.GL_COLOR_BUFFER_BIT)
@@ -212,12 +212,15 @@ class Renderer:
             GL.glUniformMatrix4fv(self.lightViewMatLoc, 1, GL.GL_TRUE, lightViewMatrix)
             for batch in self.solidBatch:
                 batch.render(frustum=lightFrustum)
+            # GL.glFinish() #TODO: (for debug) remove this later 
+            # t2 = time.time_ns()
+            # funclog(f'shadow pass {i} time: {(t2-t1)/1000}us')
             
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0)
         GL.glViewport(*oldViewport)
         return
 
-    @timing
+    @funcProfiler(ftype='3drender')
     def render(self):
         # remember previous values
         depthFunc = GL.glGetIntegerv(GL.GL_DEPTH_FUNC)
@@ -337,7 +340,7 @@ class Renderer:
         if blend:
             GL.glEnable(GL.GL_BLEND)
         GL.glClearColor(*clearColor)
-        # GL.glFinish() #TODO: (for debug) remove this later 
+        GL.glFinish() #TODO: (for debug) remove this later 
         return
 
     def getData(self, id):
@@ -458,5 +461,5 @@ class Renderer:
 
     def setLight(self, pointLight):
         self.pointLight = pointLight
-        self.__initLight()
+        self.__updateLight()
 

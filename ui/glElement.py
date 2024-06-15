@@ -44,6 +44,7 @@ class GlElement:
         self.update(delta)
         return
 
+    @funcProfiler(ftype='uiupdate')
     def updateDim(self):
         if self.constraintManager != None:
             relDim = self.constraintManager.calcConstraints(*self.constraints)
@@ -56,9 +57,11 @@ class GlElement:
         )
         self.childConstraintManager.pos = (self.dim[0], self.dim[1])
         self.childConstraintManager.dim = (self.dim[2], self.dim[3]) 
+    
     @abstractmethod
     def reshape(self):
         ...
+    
     @abstractmethod
     def update(self, delta):
         ...

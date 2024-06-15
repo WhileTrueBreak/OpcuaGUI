@@ -15,6 +15,7 @@ class SceneManager:
         self.window = window
         self.wrapper = UiWrapper(self.window, Constraints.ALIGN_PERCENTAGE(0, 0, 1, 1))
 
+    @funcProfiler(ftype='eventupdate')
     def handleEvent(self, event):
         if event['action'] == 'release' and event['obj'] in self.btns:
             self.setScene(self.sceneMap[event['obj']])
@@ -35,6 +36,7 @@ class SceneManager:
     def createUi(self):
         ...
 
+    @funcProfiler(ftype='sceneupdate')
     def update(self, delta):
         if self.currentScene == None: return
         self.currentScene.recUpdate(delta)

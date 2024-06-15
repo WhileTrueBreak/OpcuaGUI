@@ -29,10 +29,12 @@ class UiStream(GlElement):
         self.renderer.getTransform().setSize((self.openGLDim[2:4]))
         self.renderer.setDirtyVertex()
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         self.updateImage(delta)
         return
 
+    @funcProfiler(ftype='streamupdate')
     def updateImage(self, delta):
         stream = self.container.getStream()
         if stream == None: 

@@ -45,6 +45,7 @@ class UiSlider(GlElement):
         self.sliderRenderer.setDirtyVertex()
         return
 
+    @funcProfiler(ftype='uiupdate')
     def update(self, delta):
         return
 

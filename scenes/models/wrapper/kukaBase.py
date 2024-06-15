@@ -46,6 +46,7 @@ class KukaBase(Updatable, PollController):
     def __getNodeName(self, varName):
         return f'ns={self.nodeId};s=R{self.robotId}{varName}'
     
+    @funcProfiler(ftype='kukaupdate')
     def update(self, delta):
         self.__updateFromOpcua()
         self.transform = createTransformationMatrix(self.liveBaseX, self.liveBaseY, 0, 0, 0, self.liveBaseA)

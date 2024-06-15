@@ -100,6 +100,7 @@ class Window:
 
         Assets.init()
     
+    @funcProfiler(ftype='update')
     def update(self, delta):
         self.resetHovered()
         self.eventHandler()
@@ -110,6 +111,7 @@ class Window:
         # GL.glFlush()
         return
     
+    @funcProfiler(ftype='eventupdate')
     def eventHandler(self):
         cResized = False
         self.mousePos = pygame.mouse.get_pos()
@@ -144,10 +146,12 @@ class Window:
         self.uiSelectBuffer = []
         self.uiEvents = []
 
+    @funcProfiler(ftype='uiupdate')
     def updateWindow(self):
         self.dim = pygame.display.get_window_size()
         return
 
+    @funcProfiler(ftype='other')
     @timing
     def run(self):
         self.uiLayer.getMasterElem().addChild(self.sceneManager.getWrapper())
