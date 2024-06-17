@@ -53,7 +53,7 @@ void main(){
 	float lightDist = length(toLight); 
 	float sampleDist = texture(shadowMap, toLight).r;
 	if(sampleDist + 0.1 < lightDist){
-		objColor = vec4(objectColor.xyz*(ambient+diffuse/4), 1);
+		objColor = vec4(objectColor.xyz*(ambient+diffuse/2), 1);
 	}
 
 	// weight function

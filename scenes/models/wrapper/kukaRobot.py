@@ -52,9 +52,12 @@ class KukaRobot:
         self.lastForceColor = ()
         self.lastForceMat = None
 
+        self.exists = False
+
         self.__loadModel()
         self.__setupConnections()
     
+    @timing
     def __loadModel(self):
         self.modelKukaIds = []
         Robot1_T_0_ , Robot1_T_i_ = self.__T_KUKAiiwa14(self.joints)
@@ -75,6 +78,7 @@ class KukaRobot:
         for id in self.modelKukaIds:
             self.lastTmats[id] = None
         self.lastLinkTmats = Robot1_T_0_.copy()
+        self.exists = True
     
     def __getNodeName(self, name):
         return f'ns={self.nodeId};s={self.robotId}{name}'
@@ -143,6 +147,7 @@ class KukaRobot:
             self.endPose = createTransformationMatrix(*pos, *rot)
     
     def __updateJoints(self):
+        if not self.exists: return
         attachFrame = self.attach.getFrame() if self.attach else np.identity(4)
         Robot1_T_0_ = self.lastLinkTmats.copy()
         if not np.array_equal(self.lastJoints, self.joints):
@@ -237,6 +242,7 @@ class KukaRobot:
 
     def setColors(self, colors):
         self.colors = colors
+        if not self.exists: return
         for i,id in enumerate(self.modelKukaIds):
             self.modelRenderer.setColor(id, self.colors[min(i,len(colors)-1)])
 
@@ -293,10 +299,26 @@ class KukaRobot:
         return False
 
     def setViewFlag(self, flag):
+        if not self.exists: return
         for id in self.modelKukaIds:
             self.modelRenderer.setViewFlag(id, flag)
         if self.forceVectorId:
             self.modelRenderer.setViewFlag(self.forceVectorId, flag)
+
+    @timing
+    def remove(self):
+        if not self.exists: return
+        for id in self.modelKukaIds:
+            self.modelRenderer.removeModel(id)
+        if self.forceVectorId:
+            self.modelRenderer.removeModel(self.forceVectorId)
+        self.exists = False
+    
+    @timing
+    def add(self):
+        self.__loadModel()
+
+
 
 class KukaRobotTwin(Updatable, Interactable, PollController):
 
@@ -341,6 +363,7 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
 
         self.__createUi()
         self.__setupConnections()
+        self.twinRobot.remove()
     
     def __getNodeName(self, name):
         return f'ns={self.nodeId};s={self.robotId}{name}'
@@ -579,7 +602,7 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
             self.matchLive = True
             self.unlinkBtnText.setText('Unlink')
             self.sendBtnText.setText('Execute')
-            self.__updateTwinColor()
+            self.__toggleTwin()
         elif self.opcuaReceiverContainer.getValue(self.__getNodeName('f_Ready'), default=False)[0]:
             self.sendBtn.unlock()
     
@@ -714,7 +737,7 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
         self.matchLive = not self.matchLive
         self.unlinkBtnText.setText('Unlink' if self.matchLive else 'Link')
         self.hasMoved = True
-        self.__updateTwinColor()
+        self.__toggleTwin()
 
     def setLiveColors(self, colors):
         self.liveRobot.setColors(colors)
@@ -752,8 +775,10 @@ class KukaRobotTwin(Updatable, Interactable, PollController):
             return False
         return True
 
-    def __updateTwinColor(self):
+    def __toggleTwin(self):
         colors = self.twinRobot.getColors()
+        if self.matchLive: self.twinRobot.remove()
+        else: self.twinRobot.add()
         self.twinRobot.setColors([(*color[0:3], 0 if self.matchLive else 0.7) for color in colors])
 
     def isModel(self, modelId):

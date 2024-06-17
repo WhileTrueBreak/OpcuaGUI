@@ -34,21 +34,20 @@ void main() {
 	picking = uvec3(objIndex, batchId, gl_PrimitiveID+1);
 
 	//ambient
-	float ambient = 0.25;
+	float ambient = 0.35;
 
 	// diffuse
 	vec3 toLightVec = toV1(lightPos, worldPos.xyz);
 	vec3 toCameraVec = toV1(cameraPos, worldPos.xyz);
-  	float diffuse = clamp(dot(toLightVec, normalize(worldNormal.xyz)), 0, 1)*0.8;
+  	float diffuse = dot(toLightVec, normalize(worldNormal.xyz))*0.8;
 	
 	//specular
 	vec3 halfway = normalize((toLightVec+toCameraVec)/2);
-  	float specular = clamp(pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),8), 0, 1)*0.4;
+  	float specular = pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),8)*0.4;
 
 	// vec3 ambientColor = vec3(objectColor.xyz*ambient);
 	// vec3 diffuseColor = vec3(objectColor.xyz*diffuse);
 	// vec3 specularColor = vec3(objectColor.xyz*specular);
-	opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse+specular), 1);
 
 	// light shadow stuff
 	vec3 toLight = worldPos.xyz - lightPos;
@@ -57,7 +56,12 @@ void main() {
 	toLight.z = -toLight.z;
 	float lightDist = length(toLight); 
 	float sampleDist = texture(shadowMap, toLight).r;
-	if(sampleDist + 0.1 < lightDist){
-		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse/4), 1);
+	if(sampleDist + 0.1 < lightDist){ // in shadow
+		diffuse = clamp(diffuse, -1, 0)/4;
+		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse), 1);
+	}else{ // not in shadow
+		diffuse = clamp(diffuse, 0, 1);
+		specular = clamp(specular, 0, 1);
+		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse+specular), 1);
 	}
 }

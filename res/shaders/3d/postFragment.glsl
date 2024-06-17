@@ -140,8 +140,8 @@ void main() {
 	// res = vec2(distort_res.x+xoff, distort_res.y);
 
 	float grey = clamp(srgb2grey(color.rgb),0,1);
-	int colorindex = quantizeindex(grey, 8);
-	vec3 palettecolor = palette(0.65, 0.02, 0.5, 0.6, 0.03, colorindex);
+	int colorindex = quantizeindex(grey, 16);
+	vec3 palettecolor = palette(0.65, 0.01, 0.5, 0.6, 0.015, colorindex);
 	frag = vec4(palettecolor, 1);
-	// frag = color;
+	frag = color;
 }

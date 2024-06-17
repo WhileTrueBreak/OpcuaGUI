@@ -207,9 +207,7 @@ class DigitalTwinLab(Scene):
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73,6.6,0.5,0,0,-90)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73,6.6,1.35,0,0,-90)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73+0.73,6.6,0.5,0,0,-90)))
-        # self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
         self.models.append(SimpleModel(self.modelRenderer, Assets.PRUSA_XL, createTransformationMatrix(5.8+0.73+0.73+0.73,6.6,1.35,0,0,-90)))
-        # self.modelRenderer.setColor(self.models[-1].modelId, (1,1,1,0.7))
 
         self.models.append(SimpleModel(self.modelRenderer, Assets.THE_MATRIX, createTransformationMatrix(5.6,6,0,0,0,0)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.KUKA_EDU, createTransformationMatrix(4,1.2,0,0,0,-90)))

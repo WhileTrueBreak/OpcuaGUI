@@ -16,7 +16,7 @@ class BatchRenderer:
 
     @timing
     def __init__(self, shader, isTransparent=False):
-        BatchRenderer.MAX_TEXTURES = Constants.MAX_TEXTURE_SLOTS
+        BatchRenderer.MAX_TEXTURES = min(Constants.MAX_TEXTURE_SLOTS, 8)
         BatchRenderer.MAX_SSBO_SIZE = min(GL.glGetIntegerv(GL.GL_MAX_SHADER_STORAGE_BLOCK_SIZE)//64, 2**16-2)
 
         self.shader = shader
@@ -195,9 +195,9 @@ class BatchRenderer:
         GL.glBindBuffer(GL.GL_SHADER_STORAGE_BUFFER, self.ssbo)
         GL.glBindBufferBase(GL.GL_SHADER_STORAGE_BUFFER, 0, self.ssbo)
 
-        # for i in range(len(self.textures)):
-        #     GL.glActiveTexture(GL.GL_TEXTURE0 + i)
-        #     GL.glBindTexture(GL.GL_TEXTURE_2D, self.textures[i])
+        for i in range(len(self.textures)):
+            GL.glActiveTexture(GL.GL_TEXTURE0 + i)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, self.textures[i])
 
         GL.glEnableVertexAttribArray(0)
         GL.glEnableVertexAttribArray(1)
@@ -217,9 +217,9 @@ class BatchRenderer:
         GL.glDisableVertexAttribArray(1)
         GL.glDisableVertexAttribArray(0)
 
-        # for i in range(len(self.textures)):
-        #     GL.glActiveTexture(GL.GL_TEXTURE0 + i)
-        #     GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+        for i in range(len(self.textures)):
+            GL.glActiveTexture(GL.GL_TEXTURE0 + i)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
     def setProjectionMatrix(self, matrix):
         GL.glUseProgram(self.shader)

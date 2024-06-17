@@ -81,7 +81,7 @@ class Renderer:
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
         self.rendererFBO = RendererFBO(self.window.dim)
-        self.shadowCubeFBO = ShadowCubeFBO(2000)
+        self.shadowCubeFBO = ShadowCubeFBO(1500)
 
     def __updateLight(self):
         GL.glUseProgram(self.opaqueShader)
@@ -171,6 +171,11 @@ class Renderer:
     def removeModel(self, id):
         for modelid in self.idDict[id]:
             self.batches[modelid[0]].removeModel(modelid[1])
+            if self.batches[modelid[0]].currentIndex == 0: 
+                batchToRemove = self.batches[modelid[0]]
+                self.batches.remove(batchToRemove)
+                if batchToRemove.isTransparent: self.transparentBatch.remove(batchToRemove)
+                else: self.solidBatch.remove(batchToRemove)
             self.idDict.pop(modelid)
         self.idDict.pop(id)
     
@@ -221,8 +226,12 @@ class Renderer:
         GL.glFinish() #TODO: (for debug) remove this later 
         return
 
-    @funcProfiler(ftype='3drender')
+    @funcProfiler(ftype='3drender') 
     def render(self):
+        # print(f'nb: {len(self.batches)}')
+        # for batch in self.batches:
+        #     print(f'  {batch.currentIndex}')
+
         # remember previous values
         depthFunc = GL.glGetIntegerv(GL.GL_DEPTH_FUNC)
         depthTest = GL.glGetIntegerv(GL.GL_DEPTH_TEST)
