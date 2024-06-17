@@ -2,6 +2,7 @@ import OpenGL.GL as GL
 
 from utils.debug import *
 from utils.mathHelper import *
+from constants import GL_FLOAT_MAX
 
 class ShadowCubeFBO:
 
@@ -19,6 +20,8 @@ class ShadowCubeFBO:
         self.shadowCubeMapSize = size
 
         self.shadowFBO = GL.glGenFramebuffers(1)
+        
+        GL.glClearColor(GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX, GL_FLOAT_MAX)
 
         self.shadowDepthTexture = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.shadowDepthTexture)
@@ -40,6 +43,8 @@ class ShadowCubeFBO:
         GL.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE)
         for i in range(6):
             GL.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL.GL_R32F, size, size, 0, GL.GL_RED, GL.GL_FLOAT, None)
+            self.bindShadowFBO(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i)
+            GL.glClear(GL.GL_DEPTH_BUFFER_BIT|GL.GL_COLOR_BUFFER_BIT)
         GL.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, 0)
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.shadowFBO)
 

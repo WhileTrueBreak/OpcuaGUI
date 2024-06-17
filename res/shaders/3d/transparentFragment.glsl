@@ -43,7 +43,7 @@ void main(){
 	vec3 halfway = normalize((toLightVec+toV1(cameraPos, worldPos.xyz))/2);
   	float specular = clamp(pow(max(dot(halfway, normalize(worldNormal.xyz)),0.0),16), 0, 1);
 
-	vec4 objColor = vec4(objectColor.xyz*(ambient+diffuse+specular), objectColor.a);
+	vec4 objColor = vec4(0,0,0,1);
 
 	// light shadow stuff
 	vec3 toLight = worldPos.xyz - lightPos;
@@ -52,10 +52,14 @@ void main(){
 	toLight.z = -toLight.z;
 	float lightDist = length(toLight); 
 	float sampleDist = texture(shadowMap, toLight).r;
-	if(sampleDist + 0.1 < lightDist){
-		objColor = vec4(objectColor.xyz*(ambient+diffuse/2), 1);
+	if(sampleDist + 0.1 < lightDist){ // in shadow
+		diffuse = clamp(diffuse, -1, 0)/4;
+		objColor = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse), objectColor.a);
+	}else{ // not in shadow
+		diffuse = clamp(diffuse, 0, 1);
+		specular = clamp(specular, 0, 1);
+		objColor = vec4(objectColor.xyz*lightColor.xyz*(ambient+clamp(diffuse+specular,0,1)), objectColor.a);
 	}
-
 	// weight function
 	float weight = clamp(pow(min(1.0, objColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
 	accum = vec4(objColor.rgb * objColor.a, objColor.a) * weight;

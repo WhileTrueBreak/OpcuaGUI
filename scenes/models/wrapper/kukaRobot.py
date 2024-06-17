@@ -52,7 +52,7 @@ class KukaRobot:
         self.lastForceColor = ()
         self.lastForceMat = None
 
-        self.exists = False
+        self.exists = True
 
         self.__loadModel()
         self.__setupConnections()
@@ -118,13 +118,10 @@ class KukaRobot:
     
     def __updateFromOpcua(self):
         if not self.isLinkedOpcua: return
-        updateJoint = True
         for i in range(7):
-            if not self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_Joi{i+1}')):
-                updateJoint = False
-        if updateJoint:
-            for i in range(7):
-                self.joints[i] = radians(self.opcuaReceiverContainer.getValue(self.__getNodeName(f'd_Joi{i+1}'), default=0)[0])
+            nodename = self.__getNodeName(f'd_Joi{i+1}')
+            if self.opcuaReceiverContainer.hasUpdated(nodename):
+                self.joints[i] = radians(self.opcuaReceiverContainer.getValue(nodename, default=0)[0])
 
         if (self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_ForX')) and
             self.opcuaReceiverContainer.hasUpdated(self.__getNodeName(f'd_ForY')) and
@@ -317,8 +314,6 @@ class KukaRobot:
     @timing
     def add(self):
         self.__loadModel()
-
-
 
 class KukaRobotTwin(Updatable, Interactable, PollController):
 

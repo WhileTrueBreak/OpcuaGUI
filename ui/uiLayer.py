@@ -35,7 +35,7 @@ class UiLayer:
     def render(self):
         for batch in self.batches:
             batch.render()
-        GL.glFinish()
+        # GL.glFinish() #TODO: (for debug) remove this later 
         return
 
     @funcProfiler(ftype='uiupdate')

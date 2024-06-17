@@ -62,6 +62,6 @@ void main() {
 	}else{ // not in shadow
 		diffuse = clamp(diffuse, 0, 1);
 		specular = clamp(specular, 0, 1);
-		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+diffuse+specular), 1);
+		opaque = vec4(objectColor.xyz*lightColor.xyz*(ambient+clamp(diffuse+specular,0,1)), 1);
 	}
 }

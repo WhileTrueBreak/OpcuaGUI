@@ -11,6 +11,7 @@ class OpcuaContainer:
     def __init__(self):
         self.updated = {}
         self.opcuaDict = {}
+        self.nodeMapping = {}
     
     def getValue(self, key, default=None):
         if not key in self.opcuaDict: return (default, 0)
@@ -24,6 +25,13 @@ class OpcuaContainer:
     def hasUpdated(self, key):
         if not key in self.opcuaDict: return False
         return self.updated[key]
+
+    def datachange_notification(self, node, value, data):
+        print("Data change", self.nodeMapping[node][0], value, self.nodeMapping[node][1])
+        self.setValue(self.nodeMapping[node][0], value, self.nodeMapping[node][1])
+
+    def setNodeMap(self, node, key, type):
+        self.nodeMapping[node] = (key, type)
 
 class Opcua:
 
@@ -56,9 +64,35 @@ class Opcua:
 
     @staticmethod
     def createOpcuaReceiverThread(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
-        t = Thread(target = Opcua.opcuaReceiverConnection, args =(container, host, data, stop, pollingRate))
+        # t = Thread(target = Opcua.opcuaReceiverConnection, args =(container, host, data, stop, pollingRate))
+        t = Thread(target = Opcua.opcuaSubscriptionReciever, args =(container, host, data, stop))
         t.start()
         return t
+    
+    @staticmethod
+    def opcuaSubscriptionReciever(container, host, data, stop):
+        try:
+            client = Opcua(host)
+        except:
+            print(f'Opcua receiver thread stopping: {host}')
+            stop = lambda:True
+            return
+        nodes = []
+        for nodename in data:
+            node = client.opcuaClient.get_node(nodename)
+            dtype = asyncio.run(node.read_data_type_as_variant_type())
+            container.setNodeMap(node, nodename, dtype)
+            nodes.append(node)
+        subscription = asyncio.run(client.opcuaClient.create_subscription(500, container))
+        handle = asyncio.run(subscription.subscribe_data_change(nodes))
+        while not stop():
+            asyncio.run(asyncio.sleep(0.01))
+
+        asyncio.run(subscription.unsubscribe(handle))
+        client.stop()
+        print(f'Opcua receiver thread stopped: {host}')
+        pass
+
     @staticmethod
     def opcuaReceiverConnection(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         print(f'Opcua receiver thread started: {host}')
@@ -93,22 +127,25 @@ class Opcua:
             else:
                 time.sleep((nanoPerPoll - accum)/1000000000)
             if timeCounter >= 10000000000:
-                print(f'Opcua receiver polling rate: {int(rate/10)}/s')
+                # print(f'Opcua receiver polling rate: {int(rate/10)}/s')
                 timeCounter -= 10000000000
                 rate = 0
         client.stop()
         print(f'Opcua receiver thread stopped: {host}')
+    
     @staticmethod
     async def OpcuaGetData(container, data, client):
         values = await asyncio.gather(*[client.getValue(d) for d in data])
         for d, v in zip(data, values):
             container.setValue(d, *v)
             # container.setValue(d, random.random(), '')
+    
     @staticmethod
     def createOpcuaTransmitterThread(container, host, stop, pollingRate=DEFAULT_POLLING_RATE):
         t = Thread(target = Opcua.opcuaTransmitterConnection, args =(container, host, stop, pollingRate))
         t.start()
         return t
+    
     @staticmethod
     def opcuaTransmitterConnection(container, host, stop, pollingRate=DEFAULT_POLLING_RATE):
 
@@ -147,7 +184,7 @@ class Opcua:
             else:
                 time.sleep((nanoPerPoll - accum)/1000000000)
             if timeCounter >= 10000000000:
-                print(f'Opcua transmitter polling rate: {int(rate/10)}/s')
+                # print(f'Opcua transmitter polling rate: {int(rate/10)}/s')
                 timeCounter -= 10000000000
                 rate = 0
         client.stop()

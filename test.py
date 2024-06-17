@@ -1,14 +1,32 @@
-import numpy as np
+import asyncio
+import logging
+import time
+from asyncua import Client, Node, ua
+from asyncua.common import ua_utils
 
-a = np.array([1,2,3])
-b = np.array([4,5,6])
+logging.basicConfig(level=logging.INFO)
+_logger = logging.getLogger('asyncua')
 
-corners = np.array(
-    np.meshgrid(
-        [a[0], b[0]],
-        [a[1], b[1]],
-        [a[2], b[2]],
-    )
-).T.reshape(-1,3)
-corners = np.hstack([corners, np.ones((corners.shape[0],1))])
-print(corners)
+class TestSubHandler():
+        def datachange_notification(self, node, value, data):
+            print("Data change", node, value,)
+
+async def main():
+    client = Client('oct.tpc://172.32.1.236:4840/server/')
+
+    await client.connect()
+
+    subscription = await client.create_subscription(500, TestSubHandler())
+    nodes = [client.get_node('ns=21;s=R1d_Joi1')]
+    handle = await subscription.subscribe_data_change(nodes)
+
+    # while True:
+    #     await asyncio.sleep(1000)
+
+    await subscription.unsubscribe(handle)
+    await client.disconnect()
+    return 123
+
+
+if __name__ == "__main__":
+    print(asyncio.run(main()))

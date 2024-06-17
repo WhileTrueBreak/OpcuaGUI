@@ -217,13 +217,12 @@ class Renderer:
             GL.glUniformMatrix4fv(self.lightViewMatLoc, 1, GL.GL_TRUE, lightViewMatrix)
             for batch in self.solidBatch:
                 batch.render(frustum=lightFrustum)
-            # GL.glFinish() #TODO: (for debug) remove this later 
             # t2 = time.time_ns()
             # funclog(f'shadow pass {i} time: {(t2-t1)/1000}us')
             
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0)
         GL.glViewport(*oldViewport)
-        GL.glFinish() #TODO: (for debug) remove this later 
+        # GL.glFinish() #TODO: (for debug) remove this later 
         return
 
     @funcProfiler(ftype='3drender') 
@@ -350,7 +349,7 @@ class Renderer:
         if blend:
             GL.glEnable(GL.GL_BLEND)
         GL.glClearColor(*clearColor)
-        GL.glFinish() #TODO: (for debug) remove this later 
+        # GL.glFinish() #TODO: (for debug) remove this later 
         return
 
     def getData(self, id):

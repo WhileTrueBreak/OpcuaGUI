@@ -71,7 +71,6 @@ class Window:
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glViewport(0, 0, self.dim[0], self.dim[1]) # Set viewport
         GL.glEnable(GL.GL_DEPTH_TEST) # Enable depth testing
-        GL.glClearColor(0,0,0,1)
         GL.glDepthFunc(GL.GL_LESS)
 
         Constants.MAX_TEXTURE_SLOTS = GL.glGetIntegerv(GL.GL_MAX_TEXTURE_IMAGE_UNITS)
@@ -106,6 +105,7 @@ class Window:
         self.eventHandler()
         self.sceneManager.update(delta)
         self.uiLayer.update(delta)
+        GL.glClearColor(0,0,0,1)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         self.uiLayer.render()
         # GL.glFlush()
