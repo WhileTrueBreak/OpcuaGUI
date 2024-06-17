@@ -27,7 +27,7 @@ class OpcuaContainer:
         return self.updated[key]
 
     def datachange_notification(self, node, value, data):
-        print("Data change", self.nodeMapping[node][0], value, self.nodeMapping[node][1])
+        # print("Data change", self.nodeMapping[node][0], value, self.nodeMapping[node][1])
         self.setValue(self.nodeMapping[node][0], value, self.nodeMapping[node][1])
 
     def setNodeMap(self, node, key, type):
@@ -65,12 +65,12 @@ class Opcua:
     @staticmethod
     def createOpcuaReceiverThread(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         # t = Thread(target = Opcua.opcuaReceiverConnection, args =(container, host, data, stop, pollingRate))
-        t = Thread(target = Opcua.opcuaSubscriptionReciever, args =(container, host, data, stop))
+        t = Thread(target = Opcua.opcuaSubscriptionReciever, args =(container, host, data, stop, pollingRate))
         t.start()
         return t
     
     @staticmethod
-    def opcuaSubscriptionReciever(container, host, data, stop):
+    def opcuaSubscriptionReciever(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         try:
             client = Opcua(host)
         except:
@@ -83,17 +83,17 @@ class Opcua:
             dtype = asyncio.run(node.read_data_type_as_variant_type())
             container.setNodeMap(node, nodename, dtype)
             nodes.append(node)
-        subscription = asyncio.run(client.opcuaClient.create_subscription(500, container))
+        subscription = asyncio.run(client.opcuaClient.create_subscription(1000/pollingRate, container))
         handle = asyncio.run(subscription.subscribe_data_change(nodes))
         while not stop():
-            asyncio.run(asyncio.sleep(0.01))
+            asyncio.run(asyncio.sleep(0.1))
 
         asyncio.run(subscription.unsubscribe(handle))
         client.stop()
         print(f'Opcua receiver thread stopped: {host}')
         pass
 
-    @staticmethod
+    @staticmethod # old receiver
     def opcuaReceiverConnection(container, host, data, stop, pollingRate=DEFAULT_POLLING_RATE):
         print(f'Opcua receiver thread started: {host}')
         start = time.time_ns()
@@ -178,7 +178,8 @@ class Opcua:
                         loop.run_until_complete(task)
                         # asyncio.run(client.setValue(key, v, t))
                 except:
-                    return
+                    print('Something went wrong sending data')
+                    continue
                 rate += 1
                 accum = 0
             else:
