@@ -12,7 +12,7 @@ nest_asyncio.apply()
 
 @funcProfiler(ftype='init')
 def run():
-    window = Window((1200, 800), 'Digital Twin GUI', fullscreen=False, resizeable=True, vsync=False)
+    window = Window((1200, 800), 'Digital Twin GUI', fullscreen=False, resizeable=True, vsync=True)
 
     labScene = DigitalTwinLab(window, 'Digital Twin Lab')
     labScene.createUi()

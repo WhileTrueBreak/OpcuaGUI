@@ -239,7 +239,7 @@ class Renderer:
         clearColor = GL.glGetFloatv(GL.GL_COLOR_CLEAR_VALUE)
 
         # get shadow
-        self.__shadowPass(self.pointLight)
+        # self.__shadowPass(self.pointLight)
         GL.glActiveTexture(GL.GL_TEXTURE8)
         GL.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, self.shadowCubeFBO.shadowCubeMap)
 

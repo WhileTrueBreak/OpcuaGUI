@@ -94,13 +94,9 @@ class KukaRobot:
                     self.__getNodeName('d_Joi5'),
                     self.__getNodeName('d_Joi6'),
                     self.__getNodeName('d_Joi7'),
-                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
-        self.receivers.append(OpcuaReceiver([ 
                     self.__getNodeName('d_ForX'),
                     self.__getNodeName('d_ForY'),
                     self.__getNodeName('d_ForZ'),
-                ], self.opcuaReceiverContainer, Constants.OPCUA_LOCATION))
-        self.receivers.append(OpcuaReceiver([
                     self.__getNodeName('d_PosX'),
                     self.__getNodeName('d_PosY'),
                     self.__getNodeName('d_PosZ'),

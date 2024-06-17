@@ -306,7 +306,6 @@ class BatchRenderer:
     def setViewFlag(self, id, flag):
         self.inView[id] = flag
 
-    @timing
     def __calcBounds(self):
         minP = np.full((3), np.inf)
         maxP = np.full((3), -np.inf)
