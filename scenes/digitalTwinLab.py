@@ -3,14 +3,15 @@ from asset import *
 from connections.mjpegStream import MJPEGStream
 
 from scenes.scene import Scene
-from scenes.models.interfaces.model import SimpleModel, Updatable
-from scenes.models.interfaces.interactable import Interactable
-from scenes.models.moveableModel import MoveableModel
-from scenes.models.staticModel import StaticModel
-from scenes.models.wrapper.kukaBase import KukaBase
-from scenes.models.wrapper.kukaRobot import KukaRobotTwin
 from scenes.utils.movingCamera import MovingCamera
-from scenes.utils.builder import Builder
+from scenes.utils.sceneLoader import SceneLoader
+from scenes.utils.wallBuilder import WallBuilder
+
+from models.interfaces.model import SimpleModel, Updatable, Serializable
+from models.interfaces.interactable import Interactable
+from models.staticModel import StaticModel
+from models.wrapper.kukaBase import KukaBase
+from models.wrapper.kukaRobot import KukaRobotTwin
 
 from ui.elements.uiButton import UiButton
 from ui.elements.uiWrapper import UiWrapper
@@ -24,10 +25,14 @@ from ui.uiHelper import *
 
 from utils.interfaces.pollController import PollController
 from utils.mathHelper import *
+from utils.objMesh import *
 from utils.videoPlayer import *
 
 import numpy as np
+import pickle
+import shutil
 import time
+import os
 
 class DigitalTwinLab(Scene):
 
@@ -41,6 +46,7 @@ class DigitalTwinLab(Scene):
         
         self.pointLight = (10, 4, 2.5)
         self.lapsed = 0
+    
     @timing
     def createUi(self):
         self.renderWindow = Ui3DScene(self.window, Constraints.ALIGN_PERCENTAGE_PADDING(0, 0, 1, 1, DigitalTwinLab.UI_PADDING), supportTransparency=True)
@@ -54,8 +60,11 @@ class DigitalTwinLab(Scene):
         self.__createRoom()
         self.__addRobots()
         self.__addFurniture()
+        loader = SceneLoader(self.modelRenderer)
+        loader.loadSave('save')
         return
     
+    @timing
     def __createRoom(self):
         roomColor = (0.9,0.9,0.9,1)
         plan = [
@@ -124,26 +133,27 @@ class DigitalTwinLab(Scene):
             [(15.43,2.75),(15.43,2.9),(0,2.4)]]
 
         xyPlanes = [
-            (0, 0, 2.4, 15.3, 1.1, Builder.S2),
-            (0, 0, 0, 15.3, 7, Builder.S1|Builder.S2),
-            (0, 1.1, 3.1, 15.3, 5.9, Builder.S2),
-            (15.3, 1, 0, 0.13, 6, Builder.S1|Builder.S2),
-            (15.3, 1, 0.885, 0.13, 1.75, Builder.S1),
-            (15.3, 1, 2.4, 0.13, 6, Builder.S1|Builder.S2),
-            (15.43, 1, 0, 2.53, 6, Builder.S1|Builder.S2),
-            (15.43, 1, 2.4, 2.53, 6, Builder.S2)]
+            (0, 0, 2.4, 15.3, 1.1, WallBuilder.S2),
+            (0, 0, 0, 15.3, 7, WallBuilder.S1|WallBuilder.S2),
+            (0, 1.1, 3.1, 15.3, 5.9, WallBuilder.S2),
+            (15.3, 1, 0, 0.13, 6, WallBuilder.S1|WallBuilder.S2),
+            (15.3, 1, 0.885, 0.13, 1.75, WallBuilder.S1),
+            (15.3, 1, 2.4, 0.13, 6, WallBuilder.S1|WallBuilder.S2),
+            (15.43, 1, 0, 2.53, 6, WallBuilder.S1|WallBuilder.S2),
+            (15.43, 1, 2.4, 2.53, 6, WallBuilder.S2)]
         
-        self.roomPlan = Builder.buildWallPlan(plan)
-        self.roomPlan.extend([Builder.buildPlaneXY(*plane[0:5], vis=plane[5]) for plane in xyPlanes])
-        self.roomPlan.append(Builder.buildPlaneXZ(0, 1.1, 2.4, 15.3, 0.7, vis=Builder.S2))
+        roomPlan = WallBuilder.buildWallPlan(plan)
+        roomPlan.extend([WallBuilder.buildPlaneXY(*plane[0:5], vis=plane[5]) for plane in xyPlanes])
+        roomPlan.append(WallBuilder.buildPlaneXZ(0, 1.1, 2.4, 15.3, 0.7, vis=WallBuilder.S2))
         
-        self.roomPlan = Model.fromSubModels(self.roomPlan)[0]
-        room = SimpleModel(self.modelRenderer, self.roomPlan, np.identity(4))
+        roomPlan = ObjMesh.fromSubModels(roomPlan)[0]
+        room = SimpleModel(self.modelRenderer, roomPlan, np.identity(4))
         self.models.append(room)
         self.modelRenderer.setColor(room.modelId, roomColor)
 
         return
 
+    @timing
     def __addRobots(self):
         self.bases = []
         # # ROBOT 3 - KEENANS DEMO ROBOT
@@ -190,11 +200,12 @@ class DigitalTwinLab(Scene):
         self.models.append(base)
         self.models.append(arm)
 
+    @timing
     def __addFurniture(self):
-        self.models.append(SimpleModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(16.70,3.6,0,0,0,-90)))
-        self.models.append(SimpleModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,2,0,0,0,90)))
-        self.models.append(SimpleModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,4.5,0,0,0,90)))
-        self.models.append(SimpleModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,6,0,0,0,0)))
+        self.models.append(StaticModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(16.70,3.6,0,0,0,-90)))
+        self.models.append(StaticModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,2,0,0,0,90)))
+        self.models.append(StaticModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,4.5,0,0,0,90)))
+        self.models.append(StaticModel(self.modelRenderer, Assets.SHELF, createTransformationMatrix(0.9,6,0,0,0,0)))
         
         self.models.append(SimpleModel(self.modelRenderer, Assets.TABLE_RECT, createTransformationMatrix(4.5,7-0.5,0.85,0,0,90)))
         self.models.append(SimpleModel(self.modelRenderer, Assets.TABLE_SQUARE, createTransformationMatrix(10.3,7-0.9,0.85,0,0,0)))
@@ -334,12 +345,20 @@ class DigitalTwinLab(Scene):
 
     @timing
     def stop(self):
+        self.save('save')
+
         [model.stop() for model in self.models if isinstance(model, PollController)]
         for i in self.streamDict.keys():
             i.stop()
         return
 
-
+    @timing
+    def save(self, loc):
+        if os.path.exists(loc):
+            shutil.rmtree(loc)
+        for model in self.models:
+            if not isinstance(model, Serializable): continue
+            model.serialize(loc)
 
 
 

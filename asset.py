@@ -11,11 +11,12 @@ from threading import Thread
 
 import time
 
-from utils.model import *
+from utils.objMesh import *
 from utils.mathHelper import *
 from utils.sprite import Sprite
 from utils.debug import *
 from utils.characterSlot import CharacterSlot
+from utils.lazyAsset import LazyAsset
 
 from constants import Constants
 
@@ -36,78 +37,79 @@ class Assets:
 
         if Assets.INIT: return
 
-        Assets.TEXT_SHADER = Assets.linkShaders('res/shaders/ui/textureVertex.glsl', 'res/shaders/ui/textFragment.glsl')
-        Assets.GUI_SHADER = Assets.linkShaders('res/shaders/ui/guiVertex.glsl', 'res/shaders/ui/guiFragment.glsl')
-        Assets.SCREEN_SHADER = Assets.linkShaders('res/shaders/ui/screenVertex.glsl', 'res/shaders/ui/screenFragment.glsl')
+        Assets.TEXT_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/ui/textureVertex.glsl', 'res/shaders/ui/textFragment.glsl'))
+        Assets.GUI_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/ui/guiVertex.glsl', 'res/shaders/ui/guiFragment.glsl'))
+        Assets.SCREEN_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/ui/screenVertex.glsl', 'res/shaders/ui/screenFragment.glsl'))
 
-        Assets.OPAQUE_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/opaqueFragment.glsl')
-        Assets.TRANSPARENT_SHADER = Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/transparentFragment.glsl')
-        Assets.COMPOSITE_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/compositeFragment.glsl')
-        Assets.POST_SHADER = Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/postFragment.glsl')
-        Assets.SHADOW_SHADER = Assets.linkShaders('res/shaders/3d/shadowPointVertex.glsl', 'res/shaders/3d/shadowPointFragment.glsl')
+        Assets.OPAQUE_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/opaqueFragment.glsl'))
+        Assets.TRANSPARENT_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/3d/objectVertex.glsl', 'res/shaders/3d/transparentFragment.glsl'))
+        Assets.COMPOSITE_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/compositeFragment.glsl'))
+        Assets.POST_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/3d/compositeVertex.glsl', 'res/shaders/3d/postFragment.glsl'))
+        Assets.SHADOW_SHADER = LazyAsset(lambda:Assets.linkShaders('res/shaders/3d/shadowPointVertex.glsl', 'res/shaders/3d/shadowPointFragment.glsl'))
 
-        Assets.KUKA_IIWA14_MODEL = [None]*8
-        Assets.KUKA_IIWA14_MODEL[0] = Assets.loadModelFile('res/models/iiwa14/visual/link_0.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.KUKA_IIWA14_MODEL[1] = Assets.loadModelFile('res/models/iiwa14/visual/link_1.stl', createTransformationMatrix(0,0,-(0.36-0.1575), 0, 0, 0))
-        Assets.KUKA_IIWA14_MODEL[2] = Assets.loadModelFile('res/models/iiwa14/visual/link_2.stl', createTransformationMatrix(0, 0, 0, 0, 0, 180))
-        Assets.KUKA_IIWA14_MODEL[3] = Assets.loadModelFile('res/models/iiwa14/visual/link_3.stl', createTransformationMatrix(0,0,0.2045-0.42, 0, 0, 0))
-        Assets.KUKA_IIWA14_MODEL[4] = Assets.loadModelFile('res/models/iiwa14/visual/link_4.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.KUKA_IIWA14_MODEL[5] = Assets.loadModelFile('res/models/iiwa14/visual/link_5.stl', createTransformationMatrix(0,0,0.1845-0.4, 0, 0, 180))
-        Assets.KUKA_IIWA14_MODEL[6] = Assets.loadModelFile('res/models/iiwa14/visual/link_6.stl', createTransformationMatrix(0, 0, 0, 0, 0, 180))
-        Assets.KUKA_IIWA14_MODEL[7] = Assets.loadModelFile('res/models/iiwa14/visual/link_7.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
+        Assets.KUKA_IIWA14_MODEL = LazyAsset(lambda:[
+            Assets.loadModelFile('res/models/iiwa14/visual/link_0.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_1.stl', createTransformationMatrix(0,0,-(0.36-0.1575), 0, 0, 0)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_2.stl', createTransformationMatrix(0, 0, 0, 0, 0, 180)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_3.stl', createTransformationMatrix(0,0,0.2045-0.42, 0, 0, 0)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_4.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_5.stl', createTransformationMatrix(0,0,0.1845-0.4, 0, 0, 180)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_6.stl', createTransformationMatrix(0, 0, 0, 0, 0, 180)),
+            Assets.loadModelFile('res/models/iiwa14/visual/link_7.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
+        ])
 
-        Assets.GRIPPER = Assets.loadModelFile('res/models/gripper/2F140.stl', createTransformationMatrix(0, 0, 0, 0, 0, 90))
-        Assets.KUKA_BASE = Assets.loadModelFile('res/models/Objects/FlexFellow.STL', createTransformationMatrix(0, 0, -0.926, 0, 0, 0))
-        Assets.KUKA_FLEX = Assets.loadModelFile('res/models/Expo/KukaFlex.stl', np.matmul(createTransformationMatrix(9, -8.4075, 0, 0, 0, 0), createScaleMatrix(0.001, 0.001, 0.001)))
-        Assets.OMNIMOVE = Assets.loadModelFile('res/models/omnimove/KMP200.stl', np.matmul(createTransformationMatrix(0, 0, 0, 0, 0, 0), createScaleMatrix(0.001, 0.001, 0.001)))
-        Assets.OMNIMOVE_CHARGER = Assets.loadModelFile('res/models/omnimove/KMP200_Charger.stl')
+        Assets.GRIPPER = LazyAsset(lambda:Assets.loadModelFile('res/models/gripper/2F140.stl', createTransformationMatrix(0, 0, 0, 0, 0, 90)))
+        Assets.KUKA_BASE = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/FlexFellow.STL', createTransformationMatrix(0, 0, -0.926, 0, 0, 0)))
+        Assets.KUKA_FLEX = LazyAsset(lambda:Assets.loadModelFile('res/models/Expo/KukaFlex.stl', np.matmul(createTransformationMatrix(9, -8.4075, 0, 0, 0, 0), createScaleMatrix(0.001, 0.001, 0.001))))
+        Assets.OMNIMOVE = LazyAsset(lambda:Assets.loadModelFile('res/models/omnimove/KMP200.stl', np.matmul(createTransformationMatrix(0, 0, 0, 0, 0, 0), createScaleMatrix(0.001, 0.001, 0.001))))
+        Assets.OMNIMOVE_CHARGER = LazyAsset(lambda:Assets.loadModelFile('res/models/omnimove/KMP200_Charger.stl'))
         
-        Assets.KUKA_EDU = Assets.loadModelFile('res/models/Ready2_educate.STL', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.CNC_EX = Assets.loadModelFile('res/models/CNCex.STL', createTransformationMatrix(0, 0, 0, 0, 0, 0))
+        Assets.KUKA_EDU = LazyAsset(lambda:Assets.loadModelFile('res/models/Ready2_educate.STL', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
+        Assets.CNC_EX = LazyAsset(lambda:Assets.loadModelFile('res/models/CNCex.STL', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
 
-        Assets.TABLE_CUSTOM = Assets.loadModelFile('res/models/Objects/Benchtop_Custom.stl')
-        Assets.TABLE_RECT = Assets.loadModelFile('res/models/Objects/Benchtop_Rectangle.STL')
-        Assets.TABLE_SQUARE = Assets.loadModelFile('res/models/Objects/Benchtop_Square.STL')
+        Assets.TABLE_CUSTOM = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/Benchtop_Custom.stl'))
+        Assets.TABLE_RECT = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/Benchtop_Rectangle.STL'))
+        Assets.TABLE_SQUARE = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/Benchtop_Square.STL'))
 
-        Assets.TUBE_INSIDE = Assets.loadModelFile('res/models/tube/tube_inside.stl', createTransformationMatrix(0,0,0,0,90,0))
-        Assets.TUBE_OUTSIDE = Assets.loadModelFile('res/models/tube/tube_outside.stl', createTransformationMatrix(0,0,0,0,90,0))
-        Assets.TUBE_HOLDER = Assets.loadModelFile('res/models/tube/tube_holder.stl')
+        Assets.TUBE_INSIDE = LazyAsset(lambda:Assets.loadModelFile('res/models/tube/tube_inside.stl', createTransformationMatrix(0,0,0,0,90,0)))
+        Assets.TUBE_OUTSIDE = LazyAsset(lambda:Assets.loadModelFile('res/models/tube/tube_outside.stl', createTransformationMatrix(0,0,0,0,90,0)))
+        Assets.TUBE_HOLDER = LazyAsset(lambda:Assets.loadModelFile('res/models/tube/tube_holder.stl'))
 
-        Assets.BAR_STOOL = Assets.loadModelFile('res/models/Expo/BarStool.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.COUNTER = Assets.loadModelFile('res/models/Expo/Counter.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.TABLE = Assets.loadModelFile('res/models/Expo/RoundTable.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.TVSCREEN = Assets.loadModelFile('res/models/Expo/TvScreen.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0))
-        Assets.THE_MATRIX = Assets.loadModelFile('res/models/MatrixFrameV3.STL')
+        Assets.BAR_STOOL = LazyAsset(lambda:Assets.loadModelFile('res/models/Expo/BarStool.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
+        Assets.COUNTER = LazyAsset(lambda:Assets.loadModelFile('res/models/Expo/Counter.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
+        Assets.TABLE = LazyAsset(lambda:Assets.loadModelFile('res/models/Expo/RoundTable.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
+        Assets.TVSCREEN = LazyAsset(lambda:Assets.loadModelFile('res/models/Expo/TvScreen.stl', createTransformationMatrix(0, 0, 0, 0, 0, 0)))
+        Assets.THE_MATRIX = LazyAsset(lambda:Assets.loadModelFile('res/models/MatrixFrameV3.STL'))
 
-        Assets.AMW_LEFT_TEX = Assets.loadTexture('res/textures/AMW_LEFT.jpg', flipX=True, flipY=True)
-        Assets.AMW_RIGHT_TEX = Assets.loadTexture('res/textures/AMW_RIGHT.jpg', flipX=False, flipY=True)
-        Assets.AMW_MID_TEX = Assets.loadTexture('res/textures/AMW_MID.jpg', flipX=True, flipY=True)
+        Assets.AMW_LEFT_TEX = LazyAsset(lambda:Assets.loadTexture('res/textures/AMW_LEFT.jpg', flipX=True, flipY=True))
+        Assets.AMW_RIGHT_TEX = LazyAsset(lambda:Assets.loadTexture('res/textures/AMW_RIGHT.jpg', flipX=False, flipY=True))
+        Assets.AMW_MID_TEX = LazyAsset(lambda:Assets.loadTexture('res/textures/AMW_MID.jpg', flipX=True, flipY=True))
 
         # Assets.DRAGON = Assets.loadModelFile('res/models/dragon.obj', createScaleMatrix(0.01, 0.01, 0.01).dot(createTransformationMatrix(0,0,0,90,0,0)))
         # Assets.TEAPOT0 = Assets.loadModelFile('res/models/teapot.obj')
         # Assets.TEAPOT1 = Assets.loadModelFile('res/models/teapot1.obj')
         # Assets.SWORD = Assets.loadModelFile('res/models/sword.obj')
-        Assets.POLE = Assets.loadModelFile('res/models/pole.stl', createScaleMatrix(10, 10, 10))
+        Assets.POLE = LazyAsset(lambda:Assets.loadModelFile('res/models/pole.stl', createScaleMatrix(10, 10, 10)))
 
-        Assets.ENDER3_3D_PRINTER = Assets.loadModelFile('res/models/Objects/Ender3-V2.STL')
-        Assets.PRUSA_XL = Assets.loadModelFile('res/models/Prusa XLm.STL')
-        Assets.SHELF = Assets.loadModelFile('res/models/Objects/Shelving1.stl', createTransformationMatrix(0, 0, 0, 90, 0, 0))
+        Assets.ENDER3_3D_PRINTER = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/Ender3-V2.STL'))
+        Assets.PRUSA_XL = LazyAsset(lambda:Assets.loadModelFile('res/models/Prusa XLm.STL'))
+        Assets.SHELF = LazyAsset(lambda:Assets.loadModelFile('res/models/Objects/Shelving1.stl', createTransformationMatrix(0, 0, 0, 90, 0, 0)))
 
         # Assets.BAD_APPLE_VID = Assets.loadVideo('res/videos/badapple.mp4')
         # Assets.HAMSTER = Assets.loadVideo('res/videos/hamster.gif')
 
-        Assets.CUBE_TEX = Assets.loadTexture('res/textures/cube.jpg', flipY=True)
+        Assets.CUBE_TEX = LazyAsset(lambda:Assets.loadTexture('res/textures/cube.jpg', flipY=True))
         
         # Assets.LEFT_ARROW = Assets.loadTexture('res/textures/arrow.png')
         # Assets.UP_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=90)
         # Assets.RIGHT_ARROW = Assets.loadTexture('res/textures/arrow.png', flipX=True)
         # Assets.DOWN_ARROW = Assets.loadTexture('res/textures/arrow.png', rot=270)
 
-        Assets.MONACO_FONT = Assets.loadFont('res/fonts/MONACO.TTF')
-        Assets.COMIC_SANS_FONT = Assets.loadFont('res/fonts/comic_sans.ttf')
-        Assets.ARIAL_FONT = Assets.loadFont('res/fonts/ARIALNB.TTF',48*64)
+        Assets.MONACO_FONT = LazyAsset(lambda:Assets.loadFont('res/fonts/MONACO.TTF'))
+        Assets.COMIC_SANS_FONT = LazyAsset(lambda:Assets.loadFont('res/fonts/comic_sans.ttf'))
+        Assets.ARIAL_FONT = LazyAsset(lambda:Assets.loadFont('res/fonts/ARIALNB.TTF',48*64))
 
-        Assets.ARROW_BTN = Assets.loadModelFile('res/models/arrowbtn.STL', np.matmul(createScaleMatrix(0.001, 0.001, 0.001), createTransformationMatrix(-15,15,0,90,0,0)))
+        Assets.ARROW_BTN = LazyAsset(lambda:Assets.loadModelFile('res/models/arrowbtn.STL', np.matmul(createScaleMatrix(0.001, 0.001, 0.001), createTransformationMatrix(-15,15,0,90,0,0))))
 
         Assets.initPlanes()
         Assets.INIT = True
@@ -207,9 +209,9 @@ class Assets:
         models = None
         match ext:
             case '.stl':
-                models = Model.fromSTL(file=file, transform=tmat)
+                models = ObjMesh.fromSTL(file=file, transform=tmat)
             case '.obj':
-                models = Model.fromOBJ(file=file, transform=tmat)
+                models = ObjMesh.fromOBJ(file=file, transform=tmat)
             case _:
                 raise Exception(f'Unknown file type: {ext}')
         if len(models) > 1:
@@ -218,7 +220,7 @@ class Assets:
     @staticmethod
     @timing
     def loadModelVertices(vertices):
-        return Model.fromVertices(vertices)[0]
+        return ObjMesh.fromVertices(vertices)[0]
     @staticmethod
     @timing
     def loadTexture(file, flipX=False, flipY=False, rot=0):

@@ -354,7 +354,7 @@ class Renderer:
 
     def getData(self, id):
         data = []
-        for modelid in self.idDict[id]: 
+        for modelid in self.idDict[id]:
             batch = self.batches[modelid[0]]
             data.append(batch.getData(modelid[1]))
         return data

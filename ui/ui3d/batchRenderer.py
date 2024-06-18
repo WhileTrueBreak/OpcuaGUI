@@ -91,7 +91,6 @@ class BatchRenderer:
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
         GL.glBindVertexArray(0)
 
-    @timing
     def addModel(self, model, transformationMatrix):
         transformationMatrix = transformationMatrix.T
         if not True in self.isAvaliable:
@@ -102,6 +101,7 @@ class BatchRenderer:
         vShape = model.vertices.shape
         index = self.isAvaliable.index(True)
         self.inView[index] = True
+        self.colors[index] = (1,1,1,1)
 
         # added more slots if index is at the end
         if index == len(self.isAvaliable)-1 and index < BatchRenderer.MAX_SSBO_SIZE:
@@ -130,7 +130,6 @@ class BatchRenderer:
 
         return index
 
-    @timing
     def removeModel(self, id):
         self.isAvaliable[id] = True
         self.inView.pop(id, None)
@@ -300,7 +299,7 @@ class BatchRenderer:
             tex = self.textures[self.texModelMap.index(self.textureDict[id-1])]
         else:
             tex = None
-        data = {'model':self.models[id], 'color':self.colors[id-1], 'matrix':self.transformationMatrices[id].T, 'texture':tex}
+        data = {'model':self.models[id], 'color':self.colors[id], 'matrix':self.transformationMatrices[id].T, 'texture':tex}
         return data
 
     def setViewFlag(self, id, flag):

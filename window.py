@@ -119,7 +119,6 @@ class Window:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-                self.sceneManager.stop()
             elif event.type == pygame.VIDEORESIZE:
                 cResized = True
             elif event.type == pygame.KEYDOWN:
