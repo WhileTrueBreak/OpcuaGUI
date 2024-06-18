@@ -52,6 +52,8 @@ class Window:
         self.screen = pygame.display.set_mode(size, display_flags, vsync=(1 if vsync else 0))
 
         pygame.display.set_caption(title)
+        
+        print('pygame screen inited')
 
         self.dim = self.screen.get_size()
         self.ogdim = self.dim

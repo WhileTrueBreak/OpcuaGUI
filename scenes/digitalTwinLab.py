@@ -60,8 +60,6 @@ class DigitalTwinLab(Scene):
         self.__createRoom()
         self.__addRobots()
         self.__addFurniture()
-        loader = SceneLoader(self.modelRenderer)
-        loader.loadSave('save')
         return
     
     @timing
