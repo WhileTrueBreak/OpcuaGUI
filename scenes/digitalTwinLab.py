@@ -338,6 +338,7 @@ class DigitalTwinLab(Scene):
 
     @timing
     def start(self):
+        self.modelRenderer.setViewMatrix(createViewMatrix(*self.camera.getCameraTransform()))
         [model.start() for model in self.models if isinstance(model, PollController)]
         return
 
