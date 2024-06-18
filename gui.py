@@ -17,12 +17,12 @@ def run():
 
     labScene = DigitalTwinLab(window, 'Digital Twin Lab')
     labScene.createUi()
-    loadedScene = LoadedScene(window, 'Loaded')
-    loadedScene.createUi()
+    # loadedScene = LoadedScene(window, 'Loaded')
+    # loadedScene.createUi()
 
     windowSceneManager = window.getSceneManager()
     windowSceneManager.addScene(labScene)
-    windowSceneManager.addScene(loadedScene)
+    # windowSceneManager.addScene(loadedScene)
     windowSceneManager.createUi()
 
     window.run()
